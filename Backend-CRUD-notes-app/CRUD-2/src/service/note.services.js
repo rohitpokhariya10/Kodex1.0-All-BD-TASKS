@@ -74,4 +74,12 @@ const updateNoteService = async ({ id }, data) => {
 
   return updatedNote;
 };
-module.exports = { createNoteService, getNoteService, updateNoteService };
+
+const deleteNoteService = async ({ id }) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new ApiError(400, "Invalid note id");
+  }
+  let deletedNote = await noteModel.findByIdAndDelete(id);
+  return deletedNote;
+};
+module.exports = { createNoteService, getNoteService, updateNoteService , deleteNoteService };
