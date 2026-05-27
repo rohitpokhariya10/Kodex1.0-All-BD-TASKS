@@ -31,7 +31,6 @@ const updateNoteService = async ({ id }, data) => {
   let description = data.description;
   console.log(id, title, description);
   console.log("id-->", id);
-  
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new ApiError(400, "Invalid note id");
   }
