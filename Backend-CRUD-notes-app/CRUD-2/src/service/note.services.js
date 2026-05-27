@@ -20,4 +20,9 @@ const createNoteService = async ({ title, description }) => {
   });
   return newNote;
 };
+
+const getNoteService = async () => {
+  let notes = await noteModel.find();
+  return notes;
+};
  module.exports = {createNoteService};
