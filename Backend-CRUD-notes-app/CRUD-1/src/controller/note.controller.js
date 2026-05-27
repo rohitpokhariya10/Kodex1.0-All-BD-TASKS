@@ -1,5 +1,5 @@
 const noteModel = require("../models/notes.model");
-const { createNoteService, getNoteService, updateNoteService } = require("../service/note.services");
+const { createNoteService, getNoteService, updateNoteService, deleteNoteService } = require("../service/note.services");
 
 const createNoteController = async (req, res) => {
 let newNote = await  createNoteService(req.body);
@@ -28,4 +28,11 @@ const updateNoteController = async (req , res)=>{
         updatedNote
     })
 }
-module.exports = { createNoteController , getNoteController  , updateNoteController};
+
+const deleteNoteController = async (req,res)=>{
+    let deletedNote = await deleteNoteService(req.params);
+    return res.status(200).json({
+        message:"Note deleted successfully"
+    })
+}
+module.exports = { createNoteController , getNoteController  , updateNoteController , deleteNoteController};
