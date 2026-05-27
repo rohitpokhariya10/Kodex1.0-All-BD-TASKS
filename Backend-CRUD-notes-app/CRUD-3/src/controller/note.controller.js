@@ -13,5 +13,13 @@ const createNoteController = async (req, res) => {
   });
 };
 
+const getNoteController = async (req, res) => {
+  let notes = await getNoteService();
+  return res.status(200).json({
+    message: "Fetched all notes",
+    notes,
+  });
+};
 
-module.exports = { createNoteController };
+
+module.exports = { createNoteController , getNoteController  };

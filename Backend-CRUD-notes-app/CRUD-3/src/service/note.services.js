@@ -21,5 +21,12 @@ const createNoteService = async ({ title, description }) => {
   return newNote;
 };
 
+const getNoteService = async () => {
+  let notes = await noteModel.find();
+   if(!notes){
+      throw new ApiError("404" , "Notes not found")
+    }
+  return notes;
+};
 
-module.exports = { createNoteService};
+module.exports = { createNoteService , getNoteService};
