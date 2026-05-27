@@ -21,5 +21,13 @@ const getNoteController = async (req, res) => {
   });
 };
 
+const updateNoteController = async (req , res)=>{
+    let updatedNote = await updateNoteService(req.params , req.body)
+    return res.status(201).json({
+        message:"Note updated successfully",
+        updatedNote
+    })
+}
 
-module.exports = { createNoteController , getNoteController  };
+
+module.exports = { createNoteController , getNoteController , updateNoteController };
