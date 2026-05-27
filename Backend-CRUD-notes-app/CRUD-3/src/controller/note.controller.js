@@ -29,5 +29,10 @@ const updateNoteController = async (req , res)=>{
     })
 }
 
-
-module.exports = { createNoteController , getNoteController , updateNoteController };
+const deleteNoteController = async (req,res)=>{
+    let deletedNote = await deleteNoteService(req.params);
+    return res.status(200).json({
+        message:"Note deleted successfully"
+    })
+}
+module.exports = { createNoteController , getNoteController  , updateNoteController , deleteNoteController};
