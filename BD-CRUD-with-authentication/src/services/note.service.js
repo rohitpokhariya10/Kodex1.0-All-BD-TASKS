@@ -32,4 +32,9 @@ const createNoteService = async ({title , description }, user) => {
 
 };
 
-module.exports = {createNoteService};
+const getNoteService = async ()=>{
+    let notes = await Note.find()
+    //console.log("notes-->" , notes)
+    return notes;
+}
+module.exports = {createNoteService , getNoteService};
