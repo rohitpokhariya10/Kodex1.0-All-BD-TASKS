@@ -1,20 +1,17 @@
 const User = require("../models/user.model");
-const generateJwtToken = require("../utils/token");
+const ApiError = require("../utils/apiError");
+const { generateJwtToken } = require("../utils/token");
 
 const registerUserService = async ({name , email})=>{
 
     // Validate name field
     if (!name) {
-      return res.status(400).json({
-        error: "Name is required",
-      });
+      throw new ApiError(400, "Name is required");
     }
 
     // Validate email field
     if (!email) {
-      return res.status(400).json({
-        error: "Email is required",
-      });
+      throw new ApiError(400, "Email is required");
     }
 
     // Create a new user in database
