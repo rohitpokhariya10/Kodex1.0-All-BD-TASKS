@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// Schema for registered users.
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -22,6 +23,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+// User collection model.
 const User = mongoose.model("user", userSchema);
 
 module.exports = User;

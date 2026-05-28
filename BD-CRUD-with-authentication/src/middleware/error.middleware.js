@@ -1,3 +1,4 @@
+// Central error handler for all controllers and middleware.
 const errorMiddleware = (err, req, res, next) => {
   let statusCode = err.statusCode || 500;
   let message = err.message || "Internal Server Error";

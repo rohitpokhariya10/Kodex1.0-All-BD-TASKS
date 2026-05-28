@@ -1,6 +1,7 @@
 const Note = require("../models/note.model");
 const ApiError = require("../utils/apiError");
 
+// Validate note data and create a note for the logged-in user.
 const createNoteService = async ({ title, description }, user) => {
   // ---- Validation ----
   if (!title) {
@@ -30,12 +31,14 @@ const createNoteService = async ({ title, description }, user) => {
   return { newNote };
 };
 
+// Get all notes from the database.
 const getNoteService = async () => {
   let notes = await Note.find();
   //console.log("notes-->" , notes)
   return notes;
 };
 
+// Validate update data and update one note by id.
 const updateNoteService = async ({  title, description } , id) => {
   if (!id) {
     throw new ApiError(400, "Note id is required");
@@ -76,4 +79,19 @@ const updateNoteService = async ({  title, description } , id) => {
 
   return { updatedNote };
 };
-module.exports = { createNoteService, getNoteService, updateNoteService };
+
+// Delete one note by id.
+const deleteNoteService = async (id)=>{
+  if (!id) {
+    throw new ApiError(400, "Note id is required");
+  }
+
+  const deletedNote = await Note.findByIdAndDelete(id);
+
+  if (!deletedNote) {
+    throw new ApiError(404, "Note not found");
+  }
+
+  return { deletedNote };
+}
+module.exports = { createNoteService, getNoteService, updateNoteService, deleteNoteService };

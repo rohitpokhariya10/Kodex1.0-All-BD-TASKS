@@ -2,6 +2,7 @@ const User = require("../models/user.model");
 const ApiError = require("../utils/apiError");
 const { generateJwtToken } = require("../utils/token");
 
+// Validate user details, create the user, and return a JWT.
 const registerUserService = async ({name , email})=>{
 
     // Validate name field

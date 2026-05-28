@@ -6,7 +6,9 @@ const generateJwtToken = require("../utils/token");
 // Register user controller
 const registerUserController = async (req, res, next) => {
    
+    // Create the user and receive the JWT from the service layer.
     let {token , newUser} = await registerUserService(req.body);
+
     // Store JWT token in browser cookie
     // httpOnly true means frontend JavaScript cannot access this cookie
     res.cookie("JWT_TOKEN", token, {

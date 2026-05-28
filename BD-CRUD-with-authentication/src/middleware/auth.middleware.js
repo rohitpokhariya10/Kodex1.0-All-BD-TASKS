@@ -3,7 +3,7 @@ const ApiError = require("../utils/apiError");
 const { verifyToken } = require("../utils/token");
 
 
-
+// Verify JWT cookie and attach the logged-in user to req.user.
 const authMiddleware = async (req, res, next) => {
   try {
     // Get JWT token from cookies
