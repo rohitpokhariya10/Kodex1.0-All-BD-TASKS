@@ -1,4 +1,4 @@
-const { createNoteService, getNoteService } = require("../services/note.service");
+const { createNoteService, getNoteService, updateNoteService } = require("../services/note.service");
 
 const createNoteController = async (req, res) => {
   let { newNote } = await createNoteService(req.body, req.user);
@@ -16,4 +16,12 @@ const getNoteController = async (req, res) => {
         notes
     })
 };
-module.exports = { createNoteController  , getNoteController};
+
+const updateNoteController = async (req , res) =>{
+    let updatedNote = await  updateNoteService(req.body , req.params.id);
+    return res.status(200).json({
+        message:"Note updated successfully",
+        updatedNote
+    })
+}
+module.exports = { createNoteController  , getNoteController , updateNoteController};
