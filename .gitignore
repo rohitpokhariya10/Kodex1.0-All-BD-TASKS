@@ -1,3 +1,7 @@
 node_modules
 .env
 package-lock.json
+server.err
+server.log
+*.log
+*.err
