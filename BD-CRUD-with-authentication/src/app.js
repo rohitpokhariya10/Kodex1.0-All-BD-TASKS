@@ -2,15 +2,16 @@ const express = require("express");
 const errorMiddleware = require("./middleware/error.middleware");
 const authRouter = require("./routes/auth.routes");
 const noteRouter = require("./routes/note.routes");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 
 // Parse incoming JSON request bodies.
 app.use(express.json());
-
+app.use(cookieParser());
 // Register API route handlers.
-app.use("/api/auth" , authRouter);
-app.use("/api" , noteRouter)
+app.use("/api/auth", authRouter);
+app.use("/api", noteRouter);
 
 // Handle errors from routes and middleware.
 app.use(errorMiddleware);

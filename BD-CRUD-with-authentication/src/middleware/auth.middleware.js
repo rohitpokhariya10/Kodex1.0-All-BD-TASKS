@@ -2,19 +2,14 @@ const User = require("../models/user.model");
 const ApiError = require("../utils/apiError");
 const { verifyToken } = require("../utils/token");
 
-const getCookieValue = (cookieHeader, cookieName) => {
-  if (!cookieHeader) return null;
 
-  const cookies = cookieHeader.split(";").map((cookie) => cookie.trim());
-  const cookie = cookies.find((item) => item.startsWith(`${cookieName}=`));
-
-  return cookie ? decodeURIComponent(cookie.split("=")[1]) : null;
-};
 
 const authMiddleware = async (req, res, next) => {
   try {
     // Get JWT token from cookies
-    const token = req.cookies?.JWT_TOKEN || getCookieValue(req.headers.cookie, "JWT_TOKEN");
+    //console.log("cookies-->" , req.cookies);
+    const token = req.cookies?.JWT_TOKEN;
+    //console.log("token-->" , token)
 
     // If token is not present, user is not logged in
     if (!token) {
