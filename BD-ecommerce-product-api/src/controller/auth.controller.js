@@ -6,6 +6,7 @@ const ApiError = require("../utils/apiError");
 const {
   registerUserService,
   loginUserService,
+  logOutUserService,
 } = require("../service/auth.service");
 
 // Handles the HTTP layer for user registration and delegates business rules to the service.
@@ -47,7 +48,19 @@ const loginUserController = async (req, res) => {
   });
   return res
     .status(200)
-    .json({ message: `${user.name} loggedIn successfully`,  user });
+    .json({ message: `${user.name} loggedIn successfully`, user });
 };
 
-module.exports = { registerUserController, loginUserController };
+const logOutUserController = async (req, res) => {
+  await logOutUserService(req.cookies);
+  res.cookie("accessToken", { httpOnly: true });
+  res.cookie("refreshToken", { httpOnly: true });
+  return res.status(200).json({
+    message: "User logout successfully",
+  });
+};
+module.exports = {
+  registerUserController,
+  loginUserController,
+  logOutUserController,
+};

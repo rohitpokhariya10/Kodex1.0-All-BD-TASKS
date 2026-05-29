@@ -1,6 +1,6 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const errorMiddleware = require("./utils/apiError");
+const errorMiddleware = require("../src/middleware/error.middleware");
 const authRouter = require("./routes/auth.routes");
 const app = express();
 

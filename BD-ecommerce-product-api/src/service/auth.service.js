@@ -110,7 +110,7 @@ const loginUserService = async({email , password})=>{
 
   // Prepare a hashed refresh token value for safe persistence.
   let refreshTokenHash = hashToken(refreshToken);
-  user.refreshTokenHash = refreshToken;
+  user.refreshTokenHash = refreshTokenHash;
   await user.save();
 
   // Safe user response excludes password and refresh-token storage fields.
@@ -134,4 +134,27 @@ const loginUserService = async({email , password})=>{
 
 
 }
-module.exports = { registerUserService  , loginUserService};
+
+const logOutUserService = async ({refreshToken}) =>{
+    //console.log(refreshToken)
+    if(!refreshToken){
+        //Because logout should still clear cookies even if token is missing/expired.
+       return null;
+    }
+    let refreshTokenHash = hashToken(refreshToken);
+    let user = await User.findOneAndUpdate({refreshTokenHash} , {
+        //$unset --> Remove refreshToken field from this user document.
+        $unset:{
+            refreshTokenHash:1,
+        }
+    },{
+        new:true,
+    });
+    console.log("logout user-->" , user)
+    if(!user){
+        throw new ApiError(404 , "User not found");
+    }
+
+
+}
+module.exports = { registerUserService  , loginUserService , logOutUserService};
