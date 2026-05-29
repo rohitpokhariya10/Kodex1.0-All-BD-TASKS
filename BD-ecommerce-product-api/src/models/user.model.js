@@ -52,7 +52,7 @@ const userSchema = new mongoose.Schema(
     avatar: {
       url: {
         type: String,
-        default: "",
+        default: "https://ik.imagekit.io/uosvj5zwr3/Ecommerce/dummy%20profile%20img.png",
       },
       fileId: {
         type: String,
@@ -79,6 +79,7 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
 
+    // Expiration timestamp ensures email verification OTPs cannot be reused indefinitely.
     emailVerificationOtpExpiresAt: {
       type: Date,
       select: false,
@@ -90,6 +91,7 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
 
+    // Expiration timestamp limits the window for password reset attempts.
     passwordResetOtpExpiresAt: {
       type: Date,
       select: false,
@@ -118,10 +120,12 @@ const userSchema = new mongoose.Schema(
     },
   },
   {
+    // Automatically maintain createdAt and updatedAt audit fields.
     timestamps: true,
   }
 );
 
+// Compile and export the User model for data access across services.
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;

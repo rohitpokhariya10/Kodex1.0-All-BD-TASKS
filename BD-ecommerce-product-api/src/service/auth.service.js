@@ -1,7 +1,7 @@
 const User = require("../models/user.model");
 const ApiError = require("../utils/apiError");
 const { hashToken } = require("../utils/crypto.utils");
-const { hashPassword } = require("../utils/password.util");
+const { hashPassword, comparePassword } = require("../utils/password.util");
 const { generateAccessToken, generateRefreshToken } = require("../utils/token");
 
 
@@ -65,4 +65,73 @@ const registerUserService = async ({ name, email, password }) => {
 
   return {safeUser , accessToken , refreshToken};
 };
-module.exports = { registerUserService };
+
+// Authenticates an existing local user and rotates the refresh token for the session.
+const loginUserService = async({email , password})=>{
+    // Validate email before performing a database lookup.
+  if (!email?.trim()) {
+    throw new ApiError(400, "Email is required");
+  }
+
+  // Validate password presence before running bcrypt comparison.
+  if (!password?.trim()) {
+    throw new ApiError(400, "Password is required");
+  }
+
+  // Normalize email so login behavior matches registration-time storage.
+  const normalizedEmail = email.trim().toLowerCase();
+
+  // Explicitly include sensitive fields needed only for internal credential checks.
+  let user = await User.findOne({email:normalizedEmail}).select("+password +refreshTokenHash");
+
+
+  // Return the same generic error for missing users to avoid account enumeration.
+  if (!user) {
+    throw new ApiError(401, "Invalid email or password");
+  }
+
+    // Block disabled accounts even when credentials are otherwise valid.
+  if (user.isActive === false) {
+    throw new ApiError(403, "Your account has been disabled");
+  }
+
+  // Compare the supplied password with the stored bcrypt hash.
+  const isPasswordCorrect = await comparePassword(password , user.password);
+  console.log(password , user.password);
+
+  // Reject invalid credentials without exposing whether the email exists.
+  if(!isPasswordCorrect){
+    throw new ApiError(401 , "Invalid Password")
+  }
+
+  // Issue fresh tokens after successful authentication.
+  const accessToken = generateAccessToken(user._id);
+  const refreshToken = generateRefreshToken(user._id);
+
+  // Prepare a hashed refresh token value for safe persistence.
+  let refreshTokenHash = hashToken(refreshToken);
+  user.refreshTokenHash = refreshToken;
+  await user.save();
+
+  // Safe user response excludes password and refresh-token storage fields.
+  const safeUser = {
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    authProvider: user.authProvider,
+    isEmailVerified: user.isEmailVerified,
+    avatar: user.avatar,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
+   return {
+    user: safeUser,
+    accessToken,
+    refreshToken,
+  };
+
+
+
+}
+module.exports = { registerUserService  , loginUserService};
