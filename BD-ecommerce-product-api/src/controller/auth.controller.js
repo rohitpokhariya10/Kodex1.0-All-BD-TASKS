@@ -7,6 +7,7 @@ const {
   registerUserService,
   loginUserService,
   logOutUserService,
+  googleAuthCallbackService,
 } = require("../service/auth.service");
 
 // Handles the HTTP layer for user registration and delegates business rules to the service.
@@ -38,7 +39,7 @@ const registerUserController = async (req, res) => {
 const loginUserController = async (req, res) => {
   // Service returns a safe user object; raw password and token hashes stay out of the response.
   let { user, accessToken, refreshToken } = await loginUserService(req.body);
-  console.log("loggedIn user-->", user);
+  //console.log("loggedIn user-->", user);
   // Store tokens in httpOnly cookies to reduce exposure to browser-side script access.
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
@@ -59,8 +60,29 @@ const logOutUserController = async (req, res) => {
     message: "User logout successfully",
   });
 };
+
+const googleAuthCallbackController = async (req , res)=>{
+    console.log("req.user" , req.user);
+    let {safeUser, accessToken , refreshToken} = await googleAuthCallbackService(req)
+    
+     return res
+    .cookie("accessToken", accessToken, {
+      httpOnly:true,
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    })
+    .cookie("refreshToken", refreshToken, {
+      httpOnly:true,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    })
+    .status(200).json({
+      sucess:true,
+      message:`${safeUser.name} sucessfully loggedIn with google account`
+    })
+
+}
 module.exports = {
   registerUserController,
   loginUserController,
   logOutUserController,
+  googleAuthCallbackController
 };
