@@ -62,7 +62,7 @@ const logOutUserController = async (req, res) => {
 };
 
 const googleAuthCallbackController = async (req , res)=>{
-    console.log("req.user" , req.user);
+    //console.log("req.user" , req.user);
     let {safeUser, accessToken , refreshToken} = await googleAuthCallbackService(req)
     
      return res

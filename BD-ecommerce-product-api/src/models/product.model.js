@@ -7,34 +7,58 @@ const productSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+
     productName: {
       type: String,
-      required: true,
+      required: [true, "Product name is required"],
       trim: true,
     },
 
     description: {
       type: String,
+      trim: true,
+      default: "",
     },
 
     price: {
       type: Number,
-      required: true,
+      required: [true, "Product price is required"],
+      min: [0, "Price cannot be negative"],
     },
 
     category: {
-      type: String,
+      type: [
+        {
+          type: String,
+          enum: [
+            "electronics",
+            "fashion",
+            "grocery",
+            "mobile",
+            "laptop",
+            "beauty",
+            "sports",
+            "home",
+            "books",
+            "toys",
+            "other",
+          ],
+          trim: true,
+          lowercase: true,
+          
+        },
+      ],
+      default: ["other"],
     },
 
-    images: [
-      {
-        type: String,
-      },
-    ],
+    images: {
+      type: [String],
+      default: [],
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const Product = mongoose.model("Product", productSchema);
