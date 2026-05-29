@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// Opens a single MongoDB connection using the application environment config.
 const connectToDb = async (req , res)=>{
     try{
         await mongoose.connect(process.env.MONGO_URI);
