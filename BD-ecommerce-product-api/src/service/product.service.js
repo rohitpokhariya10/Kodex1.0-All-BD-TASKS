@@ -71,10 +71,20 @@ const createProductService = async (
   return product;
 };
 
-const getAllProductsService = async ()=>{
-  let products = await Product.find();
-  console.log("products--->" , products);
-  return products;
+const getAllProductsService = async (query) => {
+  //console.log("query-->" , query);
+  const { category } = query;
+  //console.log("category-->" , category);
 
-}
+  const filter = {};
+
+  if (category) {
+    filter.category = category.trim().toLowerCase();
+  }
+  //console.log("filter-->" , filter)
+
+  const products = await Product.find(filter).sort({ createdAt: -1 });
+
+  return products;
+};
 module.exports = { createProductService , getAllProductsService};

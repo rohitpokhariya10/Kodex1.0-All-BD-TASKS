@@ -8,4 +8,5 @@ const productRouter = express.Router();
 
 productRouter.post("/create" , verifyUser ,upload.array("images" , 5) ,createProductController );
 productRouter.get("/get-products" , getAllProductsController );
+
 module.exports = productRouter;
