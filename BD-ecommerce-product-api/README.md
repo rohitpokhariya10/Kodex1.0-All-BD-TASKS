@@ -36,6 +36,12 @@ The API supports user registration/login, protected product management, product 
 - Owner authorization for update/delete
 - Centralized error response middleware
 
+## Registration Email Preview
+
+When a new user registers successfully, the API sends a professional welcome email using Nodemailer.
+
+![Registration email preview](docs/registration-email-preview.svg)
+
 ## Project Structure
 
 ```txt
