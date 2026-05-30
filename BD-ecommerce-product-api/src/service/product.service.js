@@ -72,16 +72,22 @@ const createProductService = async (
 };
 
 const getAllProductsService = async (query) => {
-  //console.log("query-->" , query);
   const { category } = query;
-  //console.log("category-->" , category);
 
   const filter = {};
 
   if (category) {
-    filter.category = category.trim().toLowerCase();
+    const cleanCategory = category.trim().toLowerCase();
+
+    if (!allowedCategories.includes(cleanCategory)) {
+      throw new ApiError(
+        400,
+        `Invalid category. Allowed categories are: ${allowedCategories.join(", ")}`
+      );
+    }
+
+    filter.category = cleanCategory;
   }
-  //console.log("filter-->" , filter)
 
   const products = await Product.find(filter).sort({ createdAt: -1 });
 
