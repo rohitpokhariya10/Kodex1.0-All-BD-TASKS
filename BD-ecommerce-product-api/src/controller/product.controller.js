@@ -54,7 +54,7 @@ const updateProductController = async (req, res) => {
 
 const deleteProductByIdController = async (req, res) => {
   let deletedProduct = await deleteProductByIdService(req.params , req.user.id);
-  console.log("hi-->" , deletedProduct)
+  //console.log("hi-->" , deletedProduct)
   return res.status(200).json({
     message: `${deletedProduct.productName} deleted successfully`,
     success: true,

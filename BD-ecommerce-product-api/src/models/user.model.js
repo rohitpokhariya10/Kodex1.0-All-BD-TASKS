@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const sendmail = require("../service/mail.service");
+const templateEmail = require("../template/email.template");
 
 // User schema centralizes identity, authentication state, and account metadata.
 const userSchema = new mongoose.Schema(
@@ -125,7 +127,16 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+userSchema.post("save" , async function(docs){
+  console.log("docs-->" , docs);
+  await sendmail({
+    to:docs.email,
+    subject:`${docs.name} You are successfully registered in our platform`,
+    html: templateEmail(docs),
+  })
+
+})
+
 // Compile and export the User model for data access across services.
 const User = mongoose.model("User", userSchema);
-
 module.exports = User;

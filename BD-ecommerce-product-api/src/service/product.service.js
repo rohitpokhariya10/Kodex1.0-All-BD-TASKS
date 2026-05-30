@@ -185,7 +185,7 @@ const updateProductService = async (
 };
 
 const deleteProductByIdService = async ({ id }, userId) => {
-  console.log("deleted pid-->", id);
+//  console.log("deleted pid-->", id);
   if (!id) {
     throw new ApiError(400, "Product id is required");
   }
@@ -194,7 +194,7 @@ const deleteProductByIdService = async ({ id }, userId) => {
     throw new ApiError(400, "Invalid product id");
   }
   let product = await Product.findById(id);
-  console.log("deleted product-->", product);
+  //console.log("deleted product-->", product);
 
   if (!product) {
     throw new ApiError(404, "Product not found");
