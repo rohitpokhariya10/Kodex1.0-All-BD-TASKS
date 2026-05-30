@@ -1,26 +1,28 @@
-<svg width="1200" height="430" viewBox="0 0 1200 430" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+<svg width="1572" height="512" viewBox="0 0 1572 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">Registration Email Preview</title>
-  <desc id="desc">Preview of the registration success email sent to a new user.</desc>
-  <rect width="1200" height="430" fill="#f3f6fb"/>
-  <rect x="410" y="32" width="380" height="338" rx="12" fill="#ffffff"/>
-  <path d="M410 44C410 37.3726 415.373 32 422 32H778C784.627 32 790 37.3726 790 44V118H410V44Z" fill="url(#headerGradient)"/>
-  <text x="600" y="72" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700">Welcome to Our Platform</text>
-  <text x="600" y="94" text-anchor="middle" fill="#e6f4ff" font-family="Arial, Helvetica, sans-serif" font-size="10">Your registration was completed successfully.</text>
+  <desc id="desc">Preview of the professional registration success email sent to Rohit Pokhariya.</desc>
+  <rect width="1572" height="512" fill="#f3f6fb"/>
 
-  <text x="430" y="164" fill="#111827" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700">Hi subham,</text>
-  <text x="430" y="190" fill="#4b5563" font-family="Arial, Helvetica, sans-serif" font-size="10">Thanks for creating your account. You can now explore products, manage your</text>
-  <text x="430" y="207" fill="#4b5563" font-family="Arial, Helvetica, sans-serif" font-size="10">profile, and enjoy a smoother shopping experience.</text>
+  <rect x="525" y="27" width="516" height="456" rx="12" fill="#ffffff"/>
+  <path d="M525 39C525 32.3726 530.373 27 537 27H1029C1035.63 27 1041 32.3726 1041 39V144H525V39Z" fill="url(#headerGradient)"/>
 
-  <rect x="430" y="230" width="340" height="54" rx="8" fill="#f8fafc" stroke="#d7dde8"/>
-  <text x="442" y="251" fill="#6b7280" font-family="Arial, Helvetica, sans-serif" font-size="9">REGISTERED EMAIL</text>
-  <text x="442" y="269" fill="#2563eb" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" text-decoration="underline">subhamsamanta065@gmail.com</text>
+  <text x="783" y="80" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Welcome to Our Platform</text>
+  <text x="783" y="107" text-anchor="middle" fill="#eff6ff" font-family="Arial, Helvetica, sans-serif" font-size="12">Your registration was completed successfully.</text>
 
-  <text x="430" y="310" fill="#4b5563" font-family="Arial, Helvetica, sans-serif" font-size="10">We are happy to have you here. Your account is ready to use.</text>
-  <line x1="430" y1="338" x2="770" y2="338" stroke="#e5e7eb"/>
-  <text x="600" y="361" text-anchor="middle" fill="#8b95a7" font-family="Arial, Helvetica, sans-serif" font-size="8">This email was sent because a new account was registered with this email address.</text>
+  <text x="550" y="190" fill="#111827" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Hi Rohit Pokhariya,</text>
+  <text x="550" y="224" fill="#4b5563" font-family="Arial, Helvetica, sans-serif" font-size="14">Thanks for creating your account. You can now explore products, manage your</text>
+  <text x="550" y="246" fill="#4b5563" font-family="Arial, Helvetica, sans-serif" font-size="14">profile, and enjoy a smoother shopping experience.</text>
+
+  <rect x="550" y="275" width="466" height="72" rx="8" fill="#f8fafc" stroke="#d7dde8"/>
+  <text x="567" y="302" fill="#6b7280" font-family="Arial, Helvetica, sans-serif" font-size="12">REGISTERED EMAIL</text>
+  <text x="567" y="326" fill="#2563eb" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" text-decoration="underline">rohit.pokhariya123@gmail.com</text>
+
+  <text x="550" y="381" fill="#4b5563" font-family="Arial, Helvetica, sans-serif" font-size="13">We are happy to have you here. Your account is ready to use.</text>
+  <line x1="550" y1="419" x2="1016" y2="419" stroke="#e5e7eb"/>
+  <text x="783" y="450" text-anchor="middle" fill="#8b95a7" font-family="Arial, Helvetica, sans-serif" font-size="11">This email was sent because a new account was registered with this email address.</text>
 
   <defs>
-    <linearGradient id="headerGradient" x1="410" y1="32" x2="790" y2="118" gradientUnits="userSpaceOnUse">
+    <linearGradient id="headerGradient" x1="525" y1="27" x2="1041" y2="144" gradientUnits="userSpaceOnUse">
       <stop stop-color="#2563eb"/>
       <stop offset="1" stop-color="#14b8a6"/>
     </linearGradient>
