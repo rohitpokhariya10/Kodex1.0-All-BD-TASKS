@@ -1,9 +1,10 @@
 const {
   createProductService,
   getAllProductsService,
+  getSingleProductByIdService,
 } = require("../service/product.service");
 
-const createProductController = async (req, res, next) => {
+const createProductController = async (req, res) => {
   const product = await createProductService(req.body, req.files, req.user.id);
   console.log("files-->", req.files);
 
@@ -14,7 +15,7 @@ const createProductController = async (req, res, next) => {
   });
 };
 
-const getAllProductsController = async (req, res, next) => {
+const getAllProductsController = async (req, res) => {
   const products = await getAllProductsService(req.query);
 
   return res.status(200).json({
@@ -25,4 +26,15 @@ const getAllProductsController = async (req, res, next) => {
   });
 };
 
-module.exports = { createProductController, getAllProductsController };
+const getSingleProductByIdController = async (req , res)=>{
+  let product = await getSingleProductByIdService(req.params);
+  console.log("product by id -->" , product)
+   return res.status(200).json({
+    success: true,
+    message: "Product fetched successfully",
+   product,
+  });
+
+}
+
+module.exports = { createProductController, getAllProductsController , getSingleProductByIdController};

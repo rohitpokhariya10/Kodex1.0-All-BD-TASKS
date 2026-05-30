@@ -82,7 +82,7 @@ const getAllProductsService = async (query) => {
     if (!allowedCategories.includes(cleanCategory)) {
       throw new ApiError(
         400,
-        `Invalid category. Allowed categories are: ${allowedCategories.join(", ")}`
+        `Invalid category. Allowed categories are: ${allowedCategories.join(", ")}`,
       );
     }
 
@@ -93,4 +93,25 @@ const getAllProductsService = async (query) => {
 
   return products;
 };
-module.exports = { createProductService , getAllProductsService};
+
+const getSingleProductByIdService = async ({ id }) => {
+  console.log("Product id-->", id);
+  if (!id) {
+    throw new ApiError(400, "Product id is required");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new ApiError(400, "Invalid product id");
+  }
+  let product = await Product.findById(id);
+
+  if (!product) {
+    throw new ApiError(404, "Productnot found");
+  }
+  return product;
+};
+module.exports = {
+  createProductService,
+  getAllProductsService,
+  getSingleProductByIdService,
+};
