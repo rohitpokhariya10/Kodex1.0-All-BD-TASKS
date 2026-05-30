@@ -38,9 +38,9 @@ The API supports user registration/login, protected product management, product 
 
 ## Registration Email Preview
 
-When a new user registers successfully, the API sends a professional welcome email using Nodemailer.
+When Rohit Pokhariya registers successfully, the API sends a professional welcome email using Nodemailer.
 
-![Registration email preview](docs/registration-email-preview.svg)
+<img src="docs/registration-email-preview.svg" alt="Registration email preview for Rohit Pokhariya" width="100%" />
 
 ## Project Structure
 

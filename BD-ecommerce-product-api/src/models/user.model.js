@@ -137,6 +137,6 @@ userSchema.post("save" , async function(docs){
 
 })
 
-// Compile and export the User model for data access across services.
+
 const User = mongoose.model("User", userSchema);
 module.exports = User;
