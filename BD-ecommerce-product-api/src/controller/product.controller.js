@@ -1,8 +1,6 @@
-const { createProductService } = require("../service/product.service");
+const { createProductService, getAllProductsService } = require("../service/product.service");
 
 const createProductController = async (req, res, next) => {
-  try {
-    
     const product = await createProductService(
       req.body,
       req.files,
@@ -15,9 +13,14 @@ const createProductController = async (req, res, next) => {
       message: "Product created successfully",
       data: product,
     });
-  } catch (error) {
-    next(error);
-  }
+ 
 };
 
-module.exports = { createProductController };
+const getAllProductsController = async (req , res )=>{
+let products = await getAllProductsService();
+  return res.status(200).json({
+    message:"All products fetched sucessfully",
+    products,
+  })
+}
+module.exports = { createProductController , getAllProductsController};

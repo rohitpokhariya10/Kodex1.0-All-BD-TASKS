@@ -71,4 +71,10 @@ const createProductService = async (
   return product;
 };
 
-module.exports = { createProductService };
+const getAllProductsService = async ()=>{
+  let products = await Product.find();
+  console.log("products--->" , products);
+  return products;
+
+}
+module.exports = { createProductService , getAllProductsService};
