@@ -1,4 +1,4 @@
-# BD Ecommerce Product API
+# Backend Ecommerce Product API
 
 A backend REST API for an ecommerce product platform built with Node.js, Express, MongoDB, Mongoose, JWT authentication, Google OAuth, ImageKit image uploads, and Nodemailer email support.
 
@@ -155,6 +155,88 @@ Base URL:
 
 ```txt
 http://localhost:3000
+```
+
+## Route Documentation Comments
+
+```js
+/**
+ * @route       POST /api/auth/register
+ * @description Register a new user. Requires name, email, and password in the request body.
+ * @access      Public
+ */
+```
+
+```js
+/**
+ * @route       POST /api/auth/login
+ * @description Authenticate an existing user using email and password. Sets accessToken and refreshToken cookies on success.
+ * @access      Public
+ */
+```
+
+```js
+/**
+ * @route       POST /api/auth/logout
+ * @description Logout the current user by removing the stored refresh token hash and clearing auth cookies.
+ * @access      Public
+ */
+```
+
+```js
+/**
+ * @route       GET /api/auth/google
+ * @description Start Google OAuth authentication and redirect the user to Google's consent screen.
+ * @access      Public
+ */
+```
+
+```js
+/**
+ * @route       GET /api/auth/google/callback
+ * @description Handle Google OAuth callback, create or update the user account, and issue auth cookies.
+ * @access      Public
+ */
+```
+
+```js
+/**
+ * @route       POST /api/product/create
+ * @description Create a new product for the logged-in user. Accepts product details and up to 5 images using multipart/form-data.
+ * @access      Private
+ */
+```
+
+```js
+/**
+ * @route       GET /api/product/get-products
+ * @description Fetch all products. Supports optional category query filter.
+ * @access      Public
+ */
+```
+
+```js
+/**
+ * @route       GET /api/product/get-product/:id
+ * @description Fetch a single product by product id.
+ * @access      Public
+ */
+```
+
+```js
+/**
+ * @route       PUT /api/product/:id
+ * @description Update an existing product. Only the product creator can update it.
+ * @access      Private
+ */
+```
+
+```js
+/**
+ * @route       DELETE /api/product/delete-product/:id
+ * @description Delete an existing product and remove its images from ImageKit. Only the product creator can delete it.
+ * @access      Private
+ */
 ```
 
 ## Auth Routes
@@ -923,4 +1005,3 @@ Possible errors:
 - Only the user who created a product can update or delete it.
 - Registration and login responses set cookies automatically.
 - The current API response uses the key `sucess` in some auth responses because that is how it is implemented in the controller.
-
