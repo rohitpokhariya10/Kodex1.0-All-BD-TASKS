@@ -3,6 +3,7 @@ const {
   getAllProductsService,
   getSingleProductByIdService,
   updateProductService,
+  deleteProductByIdService,
 } = require("../service/product.service");
 
 const createProductController = async (req, res) => {
@@ -27,25 +28,44 @@ const getAllProductsController = async (req, res) => {
   });
 };
 
-const getSingleProductByIdController = async (req , res)=>{
+const getSingleProductByIdController = async (req, res) => {
   let product = await getSingleProductByIdService(req.params);
-  console.log("product by id -->" , product)
-   return res.status(200).json({
+  console.log("product by id -->", product);
+  return res.status(200).json({
     success: true,
     message: "Product fetched successfully",
-   product,
+    product,
   });
+};
 
-}
-
-const updateProductController = async (req , res) =>{
+const updateProductController = async (req, res) => {
   //console.log("req.user--->" , req.user)
-  let updatedProduct = await updateProductService(req.body , req.params , req.files , req.user.id);
+  let updatedProduct = await updateProductService(
+    req.body,
+    req.params,
+    req.files,
+    req.user.id,
+  );
   return res.status(200).json({
-    success:true,
-    message:"Product updated successfullly"
-  })
-}
+    success: true,
+    message: "Product updated successfullly",
+  });
+};
 
+const deleteProductByIdController = async (req, res) => {
+  let deletedProduct = await deleteProductByIdService(req.params , req.user.id);
+  console.log("hi-->" , deletedProduct)
+  return res.status(200).json({
+    message: `${deletedProduct.productName} deleted successfully`,
+    success: true,
+    deletedProduct
+  });
+};
 
-module.exports = { createProductController, getAllProductsController , getSingleProductByIdController , updateProductController};
+module.exports = {
+  createProductController,
+  getAllProductsController,
+  getSingleProductByIdController,
+  updateProductController,
+  deleteProductByIdController,
+};

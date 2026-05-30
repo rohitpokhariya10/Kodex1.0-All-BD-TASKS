@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const productSchema = new mongoose.Schema(
   {
     user: {
-      //Jis user ne product create kra hai us user ki id store krta hai
+      // Jis user ne product create kra hai us user ki id store krta hai
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -46,20 +46,30 @@ const productSchema = new mongoose.Schema(
           ],
           trim: true,
           lowercase: true,
-          
         },
       ],
       default: ["other"],
     },
 
     images: {
-      type: [String],
+      type: [
+        {
+          url: {
+            type: String,
+            required: true,
+          },
+          fileId: {
+            type: String,
+            required: true,
+          },
+        },
+      ],
       default: [],
     },
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 const Product = mongoose.model("Product", productSchema);

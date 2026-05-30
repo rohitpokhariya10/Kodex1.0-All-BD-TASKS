@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Product = require("../models/product.model");
+const imagekit = require("../config/imageKit");
 const ApiError = require("../utils/apiError");
 const uploadToImageKit = require("../utils/uploadToImageKit");
 
@@ -16,7 +17,7 @@ const allowedCategories = [
   "toys",
   "other",
 ];
-
+//helper function to give image url in the form of array
 const uploadProductImages = async (files) => {
   const imageUrls = [];
 
@@ -24,17 +25,19 @@ const uploadProductImages = async (files) => {
     const uploadPromises = files.map((file) => {
       return uploadToImageKit({
         file: file.buffer,
-        fileName: `${Date.now()} - ${file.fileName}`,
+        fileName: `${Date.now()} - ${file.originalname}`,
         folder: "/ecommerce/products",
       });
     });
     const uploadedImages = await Promise.all(uploadPromises);
     uploadedImages.forEach((image) => {
       // console.log("image-->",image);
-      imageUrls.push(image.url);
+      imageUrls.push({url:image.url , fileId:image.fileId});
+      
     });
   }
   console.log("ImageUrls of uploadProductImages -->", imageUrls);
+  return imageUrls;
 };
 
 const createProductService = async (
@@ -181,9 +184,44 @@ const updateProductService = async (
   return product;
 };
 
+const deleteProductByIdService = async ({ id }, userId) => {
+  console.log("deleted pid-->", id);
+  if (!id) {
+    throw new ApiError(400, "Product id is required");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new ApiError(400, "Invalid product id");
+  }
+  let product = await Product.findById(id);
+  console.log("deleted product-->", product);
+
+  if (!product) {
+    throw new ApiError(404, "Product not found");
+  }
+
+  // Owner check: only product creator can delete
+  if (product.user.toString() !== userId.toString()) {
+    throw new ApiError(403, "You are not allowed to delete this product");
+  }
+
+  if (product.images && product.images.length > 0) {
+    const deleteImagePromises = product.images.map((image) => {
+      return imagekit.deleteFile(image.fileId);
+    });
+
+    await Promise.all(deleteImagePromises);
+  }
+
+  const deletedProduct = await Product.findByIdAndDelete(id);
+
+  return deletedProduct;
+};
+
 module.exports = {
   createProductService,
   getAllProductsService,
   getSingleProductByIdService,
   updateProductService,
+  deleteProductByIdService,
 };
