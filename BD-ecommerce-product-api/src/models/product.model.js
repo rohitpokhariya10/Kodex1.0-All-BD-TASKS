@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const productSchema = new mongoose.Schema(
   {
     user: {
+      //Jis user ne product create kra hai us user ki id store krta hai
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,

@@ -2,6 +2,7 @@ const {
   createProductService,
   getAllProductsService,
   getSingleProductByIdService,
+  updateProductService,
 } = require("../service/product.service");
 
 const createProductController = async (req, res) => {
@@ -37,4 +38,14 @@ const getSingleProductByIdController = async (req , res)=>{
 
 }
 
-module.exports = { createProductController, getAllProductsController , getSingleProductByIdController};
+const updateProductController = async (req , res) =>{
+  //console.log("req.user--->" , req.user)
+  let updatedProduct = await updateProductService(req.body , req.params , req.files , req.user.id);
+  return res.status(200).json({
+    success:true,
+    message:"Product updated successfullly"
+  })
+}
+
+
+module.exports = { createProductController, getAllProductsController , getSingleProductByIdController , updateProductController};
