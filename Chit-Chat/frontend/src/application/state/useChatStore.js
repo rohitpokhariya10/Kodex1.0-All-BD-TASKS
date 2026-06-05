@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { conversationTypes, createConversation } from '../../domain/entities/conversation.js';
 import { messageStatus, createMessage } from '../../domain/entities/message.js';
 import { demoConversations, demoUser, demoUsers } from '../../infrastructure/seed/demoData.js';
@@ -9,6 +9,7 @@ export function useChatStore() {
   const [activeConversationId, setActiveConversationId] = useState(demoConversations[0]?.id ?? null);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
+  const [typingByConversation, setTypingByConversation] = useState({});
   const users = useMemo(
     () => [currentUser, ...demoUsers.filter((user) => user.id !== currentUser.id)],
     [currentUser],
@@ -39,6 +40,14 @@ export function useChatStore() {
       .map((memberId) => users.find((user) => user.id === memberId))
       .filter(Boolean);
   }, [activeConversation, users]);
+
+  const activeTypingUsers = useMemo(() => {
+    const typingUserIds = typingByConversation[activeConversationId] ?? [];
+
+    return typingUserIds
+      .map((userId) => users.find((user) => user.id === userId))
+      .filter(Boolean);
+  }, [activeConversationId, typingByConversation, users]);
 
   const notifications = useMemo(() => {
     return conversations
@@ -73,6 +82,24 @@ export function useChatStore() {
     () => conversations.reduce((total, conversation) => total + conversation.unreadCount, 0),
     [conversations],
   );
+
+  const setTypingStatus = useCallback((conversationId, userId, isTyping) => {
+    if (!conversationId || !userId) {
+      return;
+    }
+
+    setTypingByConversation((current) => {
+      const currentTypingUserIds = current[conversationId] ?? [];
+      const nextTypingUserIds = isTyping
+        ? Array.from(new Set([...currentTypingUserIds, userId]))
+        : currentTypingUserIds.filter((typingUserId) => typingUserId !== userId);
+
+      return {
+        ...current,
+        [conversationId]: nextTypingUserIds,
+      };
+    });
+  }, []);
 
   function selectConversation(conversationId) {
     setActiveConversationId(conversationId);
@@ -109,6 +136,7 @@ export function useChatStore() {
           : conversation,
       ),
     );
+    setTypingStatus(activeConversationId, currentUser.id, false);
   }
 
   function deleteMessage(messageId) {
@@ -157,7 +185,7 @@ export function useChatStore() {
       return;
     }
 
-      const uniqueMemberIds = Array.from(new Set([currentUser.id, ...memberIds]));
+    const uniqueMemberIds = Array.from(new Set([currentUser.id, ...memberIds]));
     const createdAt = new Date().toISOString();
     const groupConversation = createConversation({
       id: `c-group-${Date.now()}`,
@@ -195,6 +223,7 @@ export function useChatStore() {
     activeConversation,
     activeConversationId,
     activeMembers,
+    activeTypingUsers,
     conversations: filteredConversations,
     createGroup,
     currentUser,
@@ -207,6 +236,7 @@ export function useChatStore() {
     sendMessage,
     setFilter,
     setQuery,
+    setTypingStatus,
     totalUnread,
     updatePresence,
     users,

@@ -20,7 +20,7 @@ import {
   Video,
   X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useChatStore } from '../../application/state/useChatStore.js';
 import { conversationTypes } from '../../domain/entities/conversation.js';
 import { Avatar } from '../components/Avatar.jsx';
@@ -122,14 +122,21 @@ export function ChatWorkspace() {
           conversation={chat.activeConversation}
           currentUser={chat.currentUser}
           members={chat.activeMembers}
+          typingUsers={chat.activeTypingUsers}
         />
         <MessageTimeline
           conversation={chat.activeConversation}
           currentUser={chat.currentUser}
           onDeleteMessage={chat.deleteMessage}
+          typingUsers={chat.activeTypingUsers}
           users={chat.users}
         />
-        <Composer conversation={chat.activeConversation} onSendMessage={chat.sendMessage} />
+        <Composer
+          conversation={chat.activeConversation}
+          currentUser={chat.currentUser}
+          onSendMessage={chat.sendMessage}
+          onTypingChange={chat.setTypingStatus}
+        />
       </section>
 
       <DetailsPanel conversation={chat.activeConversation} members={chat.activeMembers} />
@@ -200,9 +207,15 @@ function ConversationItem({ conversation, currentUser, isActive, onSelect, users
   );
 }
 
-function ChatHeader({ conversation, currentUser, members }) {
+function ChatHeader({ conversation, currentUser, members, typingUsers }) {
   const visibleMembers = members.filter((member) => member.id !== currentUser.id);
   const onlineCount = members.filter((member) => member.status === 'online').length;
+  const statusText = getTypingText(typingUsers, currentUser)
+    ?? (conversation.type === conversationTypes.GROUP
+      ? `${members.length} members, ${onlineCount} online`
+      : visibleMembers[0]?.status === 'online'
+        ? 'Online now'
+        : 'Last seen 8 min ago');
 
   return (
     <header className="chat-header">
@@ -214,13 +227,7 @@ function ChatHeader({ conversation, currentUser, members }) {
         </div>
         <div>
           <h2>{conversation.title}</h2>
-          <p>
-            {conversation.type === conversationTypes.GROUP
-              ? `${members.length} members, ${onlineCount} online`
-              : visibleMembers[0]?.status === 'online'
-                ? 'Online now'
-                : 'Last seen 8 min ago'}
-          </p>
+          <p>{statusText}</p>
         </div>
       </div>
       <div className="header-actions">
@@ -238,7 +245,7 @@ function ChatHeader({ conversation, currentUser, members }) {
   );
 }
 
-function MessageTimeline({ conversation, currentUser, onDeleteMessage, users }) {
+function MessageTimeline({ conversation, currentUser, onDeleteMessage, typingUsers, users }) {
   return (
     <div className="message-timeline">
       <span className="day-divider">Today</span>
@@ -275,15 +282,23 @@ function MessageTimeline({ conversation, currentUser, onDeleteMessage, users }) 
           </article>
         );
       })}
-      <p className="typing-line">Aisha is typing...</p>
+      {typingUsers.length > 0 && (
+        <p className="typing-line">{getTypingText(typingUsers, currentUser)}</p>
+      )}
     </div>
   );
 }
 
-function Composer({ conversation, onSendMessage }) {
+function Composer({ conversation, currentUser, onSendMessage, onTypingChange }) {
   const [draft, setDraft] = useState('');
   const [attachment, setAttachment] = useState(null);
   const canSend = draft.trim().length > 0 || Boolean(attachment);
+
+  useEffect(() => {
+    onTypingChange(conversation.id, currentUser.id, draft.trim().length > 0);
+
+    return () => onTypingChange(conversation.id, currentUser.id, false);
+  }, [conversation.id, currentUser.id, draft, onTypingChange]);
 
   function submitMessage() {
     if (!canSend) {
@@ -293,6 +308,7 @@ function Composer({ conversation, onSendMessage }) {
     onSendMessage(draft, attachment);
     setDraft('');
     setAttachment(null);
+    onTypingChange(conversation.id, currentUser.id, false);
   }
 
   function handleKeyDown(event) {
@@ -365,6 +381,24 @@ function Composer({ conversation, onSendMessage }) {
       </button>
     </footer>
   );
+}
+
+function getTypingText(typingUsers, currentUser) {
+  const visibleTypingUsers = typingUsers.filter((user) => user.id !== currentUser.id);
+
+  if (typingUsers.some((user) => user.id === currentUser.id)) {
+    return 'You are typing...';
+  }
+
+  if (visibleTypingUsers.length === 1) {
+    return `${visibleTypingUsers[0].name} is typing...`;
+  }
+
+  if (visibleTypingUsers.length > 1) {
+    return `${visibleTypingUsers.length} people are typing...`;
+  }
+
+  return null;
 }
 
 function formatFileSize(size) {
