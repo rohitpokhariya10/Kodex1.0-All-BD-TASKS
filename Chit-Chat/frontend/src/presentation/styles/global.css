@@ -416,6 +416,17 @@ h1 {
   color: var(--danger);
 }
 
+.message-meta button:disabled,
+.send-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.message-meta button:disabled:hover {
+  background: transparent;
+  color: var(--muted);
+}
+
 .message-bubble p {
   margin-bottom: 8px;
   line-height: 1.55;

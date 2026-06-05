@@ -36,6 +36,7 @@ export const demoConversations = [
     type: conversationTypes.DIRECT,
     title: 'Aisha Khan',
     memberIds: ['u-rohit', 'u-aisha'],
+    currentUserId: demoUser.id,
     messages: [
       {
         id: 'm-101',
@@ -65,6 +66,7 @@ export const demoConversations = [
     type: conversationTypes.GROUP,
     title: 'Kodex Batch',
     memberIds: ['u-rohit', 'u-aisha', 'u-veer', 'u-nisha'],
+    currentUserId: demoUser.id,
     messages: [
       {
         id: 'm-201',

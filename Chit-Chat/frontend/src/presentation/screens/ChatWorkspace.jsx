@@ -18,34 +18,14 @@ import {
   Users,
   Video,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
+import { useChatStore } from '../../application/state/useChatStore.js';
 import { conversationTypes } from '../../domain/entities/conversation.js';
-import { demoConversations, demoUser, demoUsers } from '../../infrastructure/seed/demoData.js';
 import { Avatar } from '../components/Avatar.jsx';
 import { formatMessageTime } from '../utils/date.js';
 
 export function ChatWorkspace() {
-  const [activeConversationId, setActiveConversationId] = useState(demoConversations[0].id);
-  const [query, setQuery] = useState('');
-  const [filter, setFilter] = useState('all');
-
-  const conversations = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-
-    return demoConversations.filter((conversation) => {
-      const matchesQuery = !normalizedQuery || conversation.title.toLowerCase().includes(normalizedQuery);
-      const matchesFilter = filter === 'all' || conversation.type === filter;
-
-      return matchesQuery && matchesFilter;
-    });
-  }, [filter, query]);
-
-  const activeConversation = demoConversations.find(
-    (conversation) => conversation.id === activeConversationId,
-  );
-  const members = activeConversation.memberIds
-    .map((memberId) => demoUsers.find((user) => user.id === memberId))
-    .filter(Boolean);
+  const chat = useChatStore();
 
   return (
     <main className="workspace-shell">
@@ -80,8 +60,8 @@ export function ChatWorkspace() {
           <input
             type="search"
             placeholder="Search people or groups"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            value={chat.query}
+            onChange={(event) => chat.setQuery(event.target.value)}
           />
         </label>
 
@@ -94,8 +74,8 @@ export function ChatWorkspace() {
             <button
               type="button"
               key={value}
-              className={`filter-chip ${filter === value ? 'active' : ''}`}
-              onClick={() => setFilter(value)}
+              className={`filter-chip ${chat.filter === value ? 'active' : ''}`}
+              onClick={() => chat.setFilter(value)}
             >
               {label}
             </button>
@@ -103,26 +83,35 @@ export function ChatWorkspace() {
         </div>
 
         <div className="conversation-list">
-          {conversations.map((conversation) => (
+          {chat.conversations.map((conversation) => (
             <ConversationItem
               key={conversation.id}
               conversation={conversation}
-              currentUser={demoUser}
-              isActive={conversation.id === activeConversationId}
-              onSelect={() => setActiveConversationId(conversation.id)}
-              users={demoUsers}
+              currentUser={chat.currentUser}
+              isActive={conversation.id === chat.activeConversationId}
+              onSelect={() => chat.selectConversation(conversation.id)}
+              users={chat.users}
             />
           ))}
         </div>
       </aside>
 
       <section className="chat-panel" aria-label="Active conversation">
-        <ChatHeader conversation={activeConversation} currentUser={demoUser} members={members} />
-        <MessageTimeline conversation={activeConversation} currentUser={demoUser} users={demoUsers} />
-        <Composer conversation={activeConversation} />
+        <ChatHeader
+          conversation={chat.activeConversation}
+          currentUser={chat.currentUser}
+          members={chat.activeMembers}
+        />
+        <MessageTimeline
+          conversation={chat.activeConversation}
+          currentUser={chat.currentUser}
+          onDeleteMessage={chat.deleteMessage}
+          users={chat.users}
+        />
+        <Composer conversation={chat.activeConversation} onSendMessage={chat.sendMessage} />
       </section>
 
-      <DetailsPanel conversation={activeConversation} members={members} />
+      <DetailsPanel conversation={chat.activeConversation} members={chat.activeMembers} />
     </main>
   );
 }
@@ -197,12 +186,12 @@ function ChatHeader({ conversation, currentUser, members }) {
   );
 }
 
-function MessageTimeline({ conversation, currentUser, users }) {
+function MessageTimeline({ conversation, currentUser, onDeleteMessage, users }) {
   return (
     <div className="message-timeline">
       <span className="day-divider">Today</span>
       {conversation.messages.map((message) => {
-        const author = users.find((user) => user.id === message.authorId);
+        const author = users.find((user) => user.id === message.authorId) ?? currentUser;
         const isOwn = message.authorId === currentUser.id;
 
         return (
@@ -212,11 +201,16 @@ function MessageTimeline({ conversation, currentUser, users }) {
               <div className="message-meta">
                 <strong>{isOwn ? 'You' : author.name}</strong>
                 <span>{formatMessageTime(message.createdAt)}</span>
-                <button type="button" aria-label="Delete message">
+                <button
+                  type="button"
+                  aria-label="Delete message"
+                  disabled={Boolean(message.deletedAt)}
+                  onClick={() => onDeleteMessage(message.id)}
+                >
                   <Trash2 size={14} />
                 </button>
               </div>
-              <p>{message.body}</p>
+              <p>{message.deletedAt ? 'This message was deleted.' : message.body}</p>
               {message.attachment && (
                 <div className="attachment-card">
                   <Image size={18} />
@@ -234,13 +228,38 @@ function MessageTimeline({ conversation, currentUser, users }) {
   );
 }
 
-function Composer({ conversation }) {
+function Composer({ conversation, onSendMessage }) {
+  const [draft, setDraft] = useState('');
+  const canSend = draft.trim().length > 0;
+
+  function submitMessage() {
+    if (!canSend) {
+      return;
+    }
+
+    onSendMessage(draft);
+    setDraft('');
+  }
+
+  function handleKeyDown(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      submitMessage();
+    }
+  }
+
   return (
     <footer className="composer">
       <button type="button" className="icon-button" aria-label="Attach file">
         <Paperclip size={20} />
       </button>
-      <input type="text" placeholder={`Message ${conversation.title}`} />
+      <input
+        type="text"
+        placeholder={`Message ${conversation.title}`}
+        value={draft}
+        onChange={(event) => setDraft(event.target.value)}
+        onKeyDown={handleKeyDown}
+      />
       <button type="button" className="icon-button" aria-label="Attach image">
         <Image size={20} />
       </button>
@@ -250,7 +269,13 @@ function Composer({ conversation }) {
       <button type="button" className="icon-button" aria-label="Record voice message">
         <Mic size={20} />
       </button>
-      <button type="button" className="send-button" aria-label="Send message">
+      <button
+        type="button"
+        className="send-button"
+        aria-label="Send message"
+        disabled={!canSend}
+        onClick={submitMessage}
+      >
         <Send size={20} />
       </button>
     </footer>

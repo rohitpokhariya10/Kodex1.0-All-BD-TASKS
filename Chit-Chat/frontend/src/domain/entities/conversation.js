@@ -3,13 +3,15 @@ export const conversationTypes = Object.freeze({
   GROUP: 'group',
 });
 
-export function createConversation({ id, type, title, memberIds, messages = [] }) {
+export function createConversation({ id, type, title, memberIds, messages = [], currentUserId }) {
   return {
     id,
     type,
     title,
     memberIds,
     messages,
-    unreadCount: messages.filter((message) => !message.readAt).length,
+    unreadCount: messages.filter(
+      (message) => !message.readAt && message.authorId !== currentUserId,
+    ).length,
   };
 }
