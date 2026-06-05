@@ -4,7 +4,7 @@ import { App } from './presentation/App.jsx';
 import './presentation/styles/global.css';
 
 createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
+ 
     <App />
-  </React.StrictMode>,
+
 );
