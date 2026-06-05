@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Smile,
   Trash2,
+  UserRound,
   Users,
   Video,
   X,
@@ -29,6 +30,7 @@ export function ChatWorkspace() {
   const chat = useChatStore();
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   return (
     <main className="workspace-shell">
@@ -48,7 +50,12 @@ export function ChatWorkspace() {
           <Bell size={20} />
           {chat.totalUnread > 0 && <span>{chat.totalUnread}</span>}
         </button>
-        <button type="button" className="icon-button" aria-label="Settings">
+        <button
+          type="button"
+          className={`icon-button ${isSettingsOpen ? 'active' : ''}`}
+          aria-label="Settings"
+          onClick={() => setIsSettingsOpen((current) => !current)}
+        >
           <Settings size={20} />
         </button>
       </aside>
@@ -135,6 +142,14 @@ export function ChatWorkspace() {
             chat.openNotification(conversationId);
             setIsNotificationOpen(false);
           }}
+        />
+      )}
+
+      {isSettingsOpen && (
+        <SettingsPanel
+          currentUser={chat.currentUser}
+          onClose={() => setIsSettingsOpen(false)}
+          onUpdatePresence={chat.updatePresence}
         />
       )}
 
@@ -444,6 +459,79 @@ function NotificationCenter({ notifications, onClose, onOpenConversation }) {
           ))}
         </div>
       )}
+    </aside>
+  );
+}
+
+function SettingsPanel({ currentUser, onClose, onUpdatePresence }) {
+  const presenceOptions = [
+    { label: 'Online', value: 'online' },
+    { label: 'Away', value: 'away' },
+    { label: 'Offline', value: 'offline' },
+  ];
+
+  return (
+    <aside className="settings-panel" aria-label="Profile and settings">
+      <header>
+        <div>
+          <p className="eyebrow">Account</p>
+          <h2>Profile settings</h2>
+        </div>
+        <button type="button" className="icon-button" aria-label="Close settings" onClick={onClose}>
+          <X size={19} />
+        </button>
+      </header>
+
+      <section className="profile-card">
+        <Avatar user={currentUser} size="lg" />
+        <div>
+          <strong>{currentUser.name}</strong>
+          <small>{currentUser.email}</small>
+        </div>
+      </section>
+
+      <section className="settings-section">
+        <h3>Presence</h3>
+        <div className="presence-options">
+          {presenceOptions.map((option) => (
+            <button
+              type="button"
+              key={option.value}
+              className={currentUser.status === option.value ? 'selected' : ''}
+              onClick={() => onUpdatePresence(option.value)}
+            >
+              <span className={`presence-swatch presence-${option.value}`} />
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="settings-section">
+        <h3>Frontend preferences</h3>
+        <label className="toggle-row">
+          <span>
+            <strong>Desktop notifications</strong>
+            <small>Prepared for backend push events.</small>
+          </span>
+          <input type="checkbox" defaultChecked />
+        </label>
+        <label className="toggle-row">
+          <span>
+            <strong>Read receipts</strong>
+            <small>Show read state in active chats.</small>
+          </span>
+          <input type="checkbox" defaultChecked />
+        </label>
+      </section>
+
+      <section className="settings-section api-card">
+        <UserRound size={20} />
+        <div>
+          <strong>Backend handoff ready</strong>
+          <small>Map this panel to profile, status, and preferences APIs.</small>
+        </div>
+      </section>
     </aside>
   );
 }

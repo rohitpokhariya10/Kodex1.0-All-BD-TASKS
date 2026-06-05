@@ -4,10 +4,15 @@ import { messageStatus, createMessage } from '../../domain/entities/message.js';
 import { demoConversations, demoUser, demoUsers } from '../../infrastructure/seed/demoData.js';
 
 export function useChatStore() {
+  const [currentUser, setCurrentUser] = useState(demoUser);
   const [conversations, setConversations] = useState(demoConversations);
   const [activeConversationId, setActiveConversationId] = useState(demoConversations[0]?.id ?? null);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
+  const users = useMemo(
+    () => [currentUser, ...demoUsers.filter((user) => user.id !== currentUser.id)],
+    [currentUser],
+  );
 
   const filteredConversations = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -31,15 +36,15 @@ export function useChatStore() {
     }
 
     return activeConversation.memberIds
-      .map((memberId) => demoUsers.find((user) => user.id === memberId))
+      .map((memberId) => users.find((user) => user.id === memberId))
       .filter(Boolean);
-  }, [activeConversation]);
+  }, [activeConversation, users]);
 
   const notifications = useMemo(() => {
     return conversations
       .map((conversation) => {
         const unreadMessages = conversation.messages.filter(
-          (message) => !message.readAt && message.authorId !== demoUser.id && !message.deletedAt,
+          (message) => !message.readAt && message.authorId !== currentUser.id && !message.deletedAt,
         );
         const latestUnread = unreadMessages.at(-1);
 
@@ -47,7 +52,7 @@ export function useChatStore() {
           return null;
         }
 
-        const author = demoUsers.find((user) => user.id === latestUnread.authorId);
+        const author = users.find((user) => user.id === latestUnread.authorId);
 
         return {
           id: `notification-${conversation.id}`,
@@ -62,7 +67,7 @@ export function useChatStore() {
       })
       .filter(Boolean)
       .sort((first, second) => new Date(second.createdAt) - new Date(first.createdAt));
-  }, [conversations]);
+  }, [conversations, currentUser.id, users]);
 
   const totalUnread = useMemo(
     () => conversations.reduce((total, conversation) => total + conversation.unreadCount, 0),
@@ -87,7 +92,7 @@ export function useChatStore() {
 
     const nextMessage = createMessage({
       id: `m-${Date.now()}`,
-      authorId: demoUser.id,
+      authorId: currentUser.id,
       body: trimmedBody || `Shared ${attachment.name}`,
       createdAt: new Date().toISOString(),
       attachment,
@@ -100,7 +105,7 @@ export function useChatStore() {
           ? refreshConversation({
               ...conversation,
               messages: [...conversation.messages, nextMessage],
-            })
+            }, currentUser.id)
           : conversation,
       ),
     );
@@ -122,7 +127,7 @@ export function useChatStore() {
                     }
                   : message,
               ),
-            })
+            }, currentUser.id)
           : conversation,
       ),
     );
@@ -139,7 +144,7 @@ export function useChatStore() {
                 readAt: message.readAt ?? new Date().toISOString(),
                 status: messageStatus.READ,
               })),
-            })
+            }, currentUser.id)
           : conversation,
       ),
     );
@@ -152,18 +157,18 @@ export function useChatStore() {
       return;
     }
 
-    const uniqueMemberIds = Array.from(new Set([demoUser.id, ...memberIds]));
+      const uniqueMemberIds = Array.from(new Set([currentUser.id, ...memberIds]));
     const createdAt = new Date().toISOString();
     const groupConversation = createConversation({
       id: `c-group-${Date.now()}`,
       type: conversationTypes.GROUP,
       title: trimmedTitle,
       memberIds: uniqueMemberIds,
-      currentUserId: demoUser.id,
+      currentUserId: currentUser.id,
       messages: [
         createMessage({
           id: `m-system-${Date.now()}`,
-          authorId: demoUser.id,
+          authorId: currentUser.id,
           body: `Created ${trimmedTitle} with ${uniqueMemberIds.length - 1} members.`,
           createdAt,
           readAt: createdAt,
@@ -178,13 +183,21 @@ export function useChatStore() {
     setQuery('');
   }
 
+  function updatePresence(status) {
+    setCurrentUser((user) => ({
+      ...user,
+      status,
+      lastSeenAt: new Date().toISOString(),
+    }));
+  }
+
   return {
     activeConversation,
     activeConversationId,
     activeMembers,
     conversations: filteredConversations,
     createGroup,
-    currentUser: demoUser,
+    currentUser,
     deleteMessage,
     filter,
     notifications,
@@ -195,18 +208,19 @@ export function useChatStore() {
     setFilter,
     setQuery,
     totalUnread,
-    users: demoUsers,
+    updatePresence,
+    users,
   };
 }
 
-function refreshConversation(conversation) {
+function refreshConversation(conversation, currentUserId = demoUser.id) {
   const lastMessage = conversation.messages.at(-1);
 
   return {
     ...conversation,
     lastActivityAt: lastMessage?.createdAt ?? conversation.lastActivityAt,
     unreadCount: conversation.messages.filter(
-      (message) => !message.readAt && message.authorId !== demoUser.id,
+      (message) => !message.readAt && message.authorId !== currentUserId,
     ).length,
   };
 }
