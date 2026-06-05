@@ -871,6 +871,119 @@ h1 {
   color: var(--text);
 }
 
+.shared-files-section {
+  gap: 12px;
+}
+
+.section-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.section-heading-row h3 {
+  margin-bottom: 0;
+}
+
+.section-heading-row span {
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  background: rgba(101, 148, 255, 0.14);
+  color: var(--blue);
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
+.file-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.file-tabs button {
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.file-tabs button:hover,
+.file-tabs button.active {
+  border-color: rgba(23, 181, 159, 0.46);
+  background: rgba(23, 181, 159, 0.1);
+  color: var(--text);
+}
+
+.shared-file-list {
+  display: grid;
+  gap: 10px;
+}
+
+.shared-file-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.shared-file-row > span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(240, 184, 77, 0.14);
+  color: var(--amber);
+}
+
+.shared-file-row strong,
+.shared-file-row small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shared-file-row small {
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+.details-empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 22px 14px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.details-empty svg {
+  color: var(--blue);
+}
+
+.details-empty strong {
+  color: var(--text);
+}
+
+.details-empty p {
+  margin-bottom: 0;
+  line-height: 1.45;
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;

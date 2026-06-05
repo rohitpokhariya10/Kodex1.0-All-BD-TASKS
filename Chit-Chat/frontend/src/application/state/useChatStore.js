@@ -49,6 +49,26 @@ export function useChatStore() {
       .filter(Boolean);
   }, [activeConversationId, typingByConversation, users]);
 
+  const activeSharedFiles = useMemo(() => {
+    if (!activeConversation) {
+      return [];
+    }
+
+    return activeConversation.messages
+      .filter((message) => message.attachment && !message.deletedAt)
+      .map((message) => {
+        const author = users.find((user) => user.id === message.authorId);
+
+        return {
+          ...message.attachment,
+          authorName: author?.name ?? 'Unknown user',
+          createdAt: message.createdAt,
+          id: `${message.id}-${message.attachment.name}`,
+        };
+      })
+      .sort((first, second) => new Date(second.createdAt) - new Date(first.createdAt));
+  }, [activeConversation, users]);
+
   const notifications = useMemo(() => {
     return conversations
       .map((conversation) => {
@@ -223,6 +243,7 @@ export function useChatStore() {
     activeConversation,
     activeConversationId,
     activeMembers,
+    activeSharedFiles,
     activeTypingUsers,
     conversations: filteredConversations,
     createGroup,

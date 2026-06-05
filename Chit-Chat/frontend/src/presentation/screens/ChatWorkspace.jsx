@@ -139,7 +139,11 @@ export function ChatWorkspace() {
         />
       </section>
 
-      <DetailsPanel conversation={chat.activeConversation} members={chat.activeMembers} />
+      <DetailsPanel
+        conversation={chat.activeConversation}
+        members={chat.activeMembers}
+        sharedFiles={chat.activeSharedFiles}
+      />
 
       {isNotificationOpen && (
         <NotificationCenter
@@ -413,7 +417,20 @@ function formatFileSize(size) {
   return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function DetailsPanel({ conversation, members }) {
+function DetailsPanel({ conversation, members, sharedFiles }) {
+  const [fileFilter, setFileFilter] = useState('all');
+  const filteredFiles = sharedFiles.filter((file) => {
+    if (fileFilter === 'all') {
+      return true;
+    }
+
+    if (fileFilter === 'images') {
+      return file.previewKind === 'image' || file.type?.startsWith('image/');
+    }
+
+    return file.previewKind !== 'image' && !file.type?.startsWith('image/');
+  });
+
   return (
     <aside className="details-panel" aria-label="Conversation details">
       <header>
@@ -448,6 +465,57 @@ function DetailsPanel({ conversation, members }) {
         <button type="button">
           <ShieldCheck size={18} /> Privacy status
         </button>
+      </section>
+
+      <section className="details-section shared-files-section">
+        <div className="section-heading-row">
+          <h3>Shared files</h3>
+          <span>{sharedFiles.length}</span>
+        </div>
+        <div className="file-tabs">
+          {[
+            ['all', 'All'],
+            ['images', 'Images'],
+            ['files', 'Files'],
+          ].map(([value, label]) => (
+            <button
+              type="button"
+              key={value}
+              className={fileFilter === value ? 'active' : ''}
+              onClick={() => setFileFilter(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {filteredFiles.length === 0 ? (
+          <div className="details-empty">
+            <Files size={22} />
+            <strong>No shared files</strong>
+            <p>Attachments from this chat will appear here.</p>
+          </div>
+        ) : (
+          <div className="shared-file-list">
+            {filteredFiles.map((file) => (
+              <article key={file.id} className="shared-file-row">
+                <span>
+                  {file.previewKind === 'image' || file.type?.startsWith('image/') ? (
+                    <Image size={17} />
+                  ) : (
+                    <Files size={17} />
+                  )}
+                </span>
+                <div>
+                  <strong>{file.name}</strong>
+                  <small>
+                    {file.size} by {file.authorName}
+                  </small>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
     </aside>
   );
