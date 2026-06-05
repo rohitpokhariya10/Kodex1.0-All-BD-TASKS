@@ -9,6 +9,7 @@ export function useChatStore() {
   const [activeConversationId, setActiveConversationId] = useState(demoConversations[0]?.id ?? null);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
+  const [connectionStatus, setConnectionStatus] = useState('ready');
   const [typingByConversation, setTypingByConversation] = useState({});
   const users = useMemo(
     () => [currentUser, ...demoUsers.filter((user) => user.id !== currentUser.id)],
@@ -239,12 +240,26 @@ export function useChatStore() {
     }));
   }
 
+  function previewLoadingState() {
+    setConnectionStatus('syncing');
+    window.setTimeout(() => setConnectionStatus('ready'), 900);
+  }
+
+  function previewErrorState() {
+    setConnectionStatus('error');
+  }
+
+  function recoverConnection() {
+    setConnectionStatus('ready');
+  }
+
   return {
     activeConversation,
     activeConversationId,
     activeMembers,
     activeSharedFiles,
     activeTypingUsers,
+    connectionStatus,
     conversations: filteredConversations,
     createGroup,
     currentUser,
@@ -252,7 +267,10 @@ export function useChatStore() {
     filter,
     notifications,
     openNotification,
+    previewErrorState,
+    previewLoadingState,
     query,
+    recoverConnection,
     selectConversation,
     sendMessage,
     setFilter,

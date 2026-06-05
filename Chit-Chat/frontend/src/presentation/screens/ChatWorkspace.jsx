@@ -1,15 +1,18 @@
 import {
+  AlertTriangle,
   Bell,
   CirclePlus,
   Files,
   Hash,
   Image,
   Info,
+  Inbox,
   Menu,
   MessageSquareText,
   Mic,
   Paperclip,
   Phone,
+  RefreshCw,
   Search,
   Send,
   Settings,
@@ -183,7 +186,11 @@ export function ChatWorkspace() {
         <SettingsPanel
           currentUser={chat.currentUser}
           onClose={() => setIsSettingsOpen(false)}
+          onPreviewError={chat.previewErrorState}
+          onPreviewLoading={chat.previewLoadingState}
+          onRecoverConnection={chat.recoverConnection}
           onUpdatePresence={chat.updatePresence}
+          status={chat.connectionStatus}
         />
       )}
 
@@ -203,6 +210,10 @@ export function ChatWorkspace() {
 }
 
 function ConversationRail({ chat, onCreateGroup, onSelectConversation }) {
+  const isSyncing = chat.connectionStatus === 'syncing';
+  const hasError = chat.connectionStatus === 'error';
+  const hasNoConversations = chat.conversations.length === 0;
+
   return (
     <aside className="conversation-rail" aria-label="Conversations">
       <header className="rail-header">
@@ -247,19 +258,77 @@ function ConversationRail({ chat, onCreateGroup, onSelectConversation }) {
         ))}
       </div>
 
-      <div className="conversation-list">
-        {chat.conversations.map((conversation) => (
-          <ConversationItem
-            key={conversation.id}
-            conversation={conversation}
-            currentUser={chat.currentUser}
-            isActive={conversation.id === chat.activeConversationId}
-            onSelect={() => onSelectConversation(conversation.id)}
-            users={chat.users}
-          />
-        ))}
-      </div>
+      {isSyncing && <ConversationSkeletonList />}
+
+      {hasError && (
+        <StatePanel
+          actionLabel="Retry sync"
+          icon={AlertTriangle}
+          onAction={chat.recoverConnection}
+          text="The backend API did not respond. Your frontend can recover without losing UI state."
+          title="Unable to sync chats"
+        />
+      )}
+
+      {!isSyncing && !hasError && hasNoConversations && (
+        <StatePanel
+          icon={Inbox}
+          text={
+            chat.query
+              ? 'No conversations match your search.'
+              : 'Create a group or wait for backend conversations to load.'
+          }
+          title={chat.query ? 'No results found' : 'No conversations yet'}
+        />
+      )}
+
+      {!isSyncing && !hasError && !hasNoConversations && (
+        <div className="conversation-list">
+          {chat.conversations.map((conversation) => (
+            <ConversationItem
+              key={conversation.id}
+              conversation={conversation}
+              currentUser={chat.currentUser}
+              isActive={conversation.id === chat.activeConversationId}
+              onSelect={() => onSelectConversation(conversation.id)}
+              users={chat.users}
+            />
+          ))}
+        </div>
+      )}
     </aside>
+  );
+}
+
+function ConversationSkeletonList() {
+  return (
+    <div className="skeleton-list" aria-label="Loading conversations">
+      {[0, 1, 2, 3].map((item) => (
+        <div key={item} className="skeleton-card">
+          <span />
+          <div>
+            <i />
+            <small />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function StatePanel({ actionLabel, icon: Icon, onAction, text, title }) {
+  return (
+    <section className="state-panel">
+      <Icon size={24} />
+      <strong>{title}</strong>
+      <p>{text}</p>
+      {actionLabel && (
+        <button type="button" onClick={onAction}>
+          <RefreshCw size={16} />
+          {actionLabel}
+        </button>
+      )}
+    </section>
   );
 }
 
@@ -701,7 +770,15 @@ function NotificationCenter({ notifications, onClose, onOpenConversation }) {
   );
 }
 
-function SettingsPanel({ currentUser, onClose, onUpdatePresence }) {
+function SettingsPanel({
+  currentUser,
+  onClose,
+  onPreviewError,
+  onPreviewLoading,
+  onRecoverConnection,
+  onUpdatePresence,
+  status,
+}) {
   const presenceOptions = [
     { label: 'Online', value: 'online' },
     { label: 'Away', value: 'away' },
@@ -761,6 +838,24 @@ function SettingsPanel({ currentUser, onClose, onUpdatePresence }) {
           </span>
           <input type="checkbox" defaultChecked />
         </label>
+      </section>
+
+      <section className="settings-section">
+        <h3>API state preview</h3>
+        <div className="status-chip-row">
+          <span className={`status-chip status-${status}`}>{status}</span>
+        </div>
+        <div className="settings-actions">
+          <button type="button" onClick={onPreviewLoading}>
+            <RefreshCw size={16} /> Loading
+          </button>
+          <button type="button" onClick={onPreviewError}>
+            <AlertTriangle size={16} /> Error
+          </button>
+          <button type="button" onClick={onRecoverConnection}>
+            <ShieldCheck size={16} /> Ready
+          </button>
+        </div>
       </section>
 
       <section className="settings-section api-card">
