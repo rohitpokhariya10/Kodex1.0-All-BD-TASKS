@@ -5,6 +5,7 @@ import {
   Hash,
   Image,
   Info,
+  Menu,
   MessageSquareText,
   Mic,
   Paperclip,
@@ -32,6 +33,7 @@ export function ChatWorkspace() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isMessageSearchOpen, setIsMessageSearchOpen] = useState(false);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [messageSearchQuery, setMessageSearchQuery] = useState('');
 
   return (
@@ -62,64 +64,21 @@ export function ChatWorkspace() {
         </button>
       </aside>
 
-      <aside className="conversation-rail" aria-label="Conversations">
-        <header className="rail-header">
-          <div>
-            <p className="eyebrow">PulseDesk</p>
-            <h1>Messages</h1>
-          </div>
-          <button
-            type="button"
-            className="icon-button solid"
-            aria-label="Create group"
-            onClick={() => setIsGroupModalOpen(true)}
-          >
-            <CirclePlus size={20} />
-          </button>
-        </header>
-
-        <label className="search-field">
-          <Search size={18} />
-          <input
-            type="search"
-            placeholder="Search people or groups"
-            value={chat.query}
-            onChange={(event) => chat.setQuery(event.target.value)}
-          />
-        </label>
-
-        <div className="filter-row">
-          {[
-            ['all', 'All'],
-            [conversationTypes.DIRECT, 'Direct'],
-            [conversationTypes.GROUP, 'Groups'],
-          ].map(([value, label]) => (
-            <button
-              type="button"
-              key={value}
-              className={`filter-chip ${chat.filter === value ? 'active' : ''}`}
-              onClick={() => chat.setFilter(value)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        <div className="conversation-list">
-          {chat.conversations.map((conversation) => (
-            <ConversationItem
-              key={conversation.id}
-              conversation={conversation}
-              currentUser={chat.currentUser}
-              isActive={conversation.id === chat.activeConversationId}
-              onSelect={() => chat.selectConversation(conversation.id)}
-              users={chat.users}
-            />
-          ))}
-        </div>
-      </aside>
+      <ConversationRail
+        chat={chat}
+        onCreateGroup={() => setIsGroupModalOpen(true)}
+        onSelectConversation={(conversationId) => chat.selectConversation(conversationId)}
+      />
 
       <section className="chat-panel" aria-label="Active conversation">
+        <button
+          type="button"
+          className="mobile-drawer-button"
+          aria-label="Open conversations"
+          onClick={() => setIsMobileDrawerOpen(true)}
+        >
+          <Menu size={21} />
+        </button>
         <ChatHeader
           conversation={chat.activeConversation}
           currentUser={chat.currentUser}
@@ -171,6 +130,44 @@ export function ChatWorkspace() {
         sharedFiles={chat.activeSharedFiles}
       />
 
+      {isMobileDrawerOpen && (
+        <div className="mobile-drawer-shell">
+          <button
+            type="button"
+            className="mobile-drawer-backdrop"
+            aria-label="Close conversations"
+            onClick={() => setIsMobileDrawerOpen(false)}
+          />
+          <aside className="mobile-conversation-drawer" aria-label="Mobile conversations">
+            <header className="drawer-header">
+              <div>
+                <p className="eyebrow">PulseDesk</p>
+                <h2>Conversations</h2>
+              </div>
+              <button
+                type="button"
+                className="icon-button"
+                aria-label="Close conversations"
+                onClick={() => setIsMobileDrawerOpen(false)}
+              >
+                <X size={19} />
+              </button>
+            </header>
+            <ConversationRail
+              chat={chat}
+              onCreateGroup={() => {
+                setIsGroupModalOpen(true);
+                setIsMobileDrawerOpen(false);
+              }}
+              onSelectConversation={(conversationId) => {
+                chat.selectConversation(conversationId);
+                setIsMobileDrawerOpen(false);
+              }}
+            />
+          </aside>
+        </div>
+      )}
+
       {isNotificationOpen && (
         <NotificationCenter
           notifications={chat.notifications}
@@ -202,6 +199,67 @@ export function ChatWorkspace() {
         />
       )}
     </main>
+  );
+}
+
+function ConversationRail({ chat, onCreateGroup, onSelectConversation }) {
+  return (
+    <aside className="conversation-rail" aria-label="Conversations">
+      <header className="rail-header">
+        <div>
+          <p className="eyebrow">PulseDesk</p>
+          <h1>Messages</h1>
+        </div>
+        <button
+          type="button"
+          className="icon-button solid"
+          aria-label="Create group"
+          onClick={onCreateGroup}
+        >
+          <CirclePlus size={20} />
+        </button>
+      </header>
+
+      <label className="search-field">
+        <Search size={18} />
+        <input
+          type="search"
+          placeholder="Search people or groups"
+          value={chat.query}
+          onChange={(event) => chat.setQuery(event.target.value)}
+        />
+      </label>
+
+      <div className="filter-row">
+        {[
+          ['all', 'All'],
+          [conversationTypes.DIRECT, 'Direct'],
+          [conversationTypes.GROUP, 'Groups'],
+        ].map(([value, label]) => (
+          <button
+            type="button"
+            key={value}
+            className={`filter-chip ${chat.filter === value ? 'active' : ''}`}
+            onClick={() => chat.setFilter(value)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <div className="conversation-list">
+        {chat.conversations.map((conversation) => (
+          <ConversationItem
+            key={conversation.id}
+            conversation={conversation}
+            currentUser={chat.currentUser}
+            isActive={conversation.id === chat.activeConversationId}
+            onSelect={() => onSelectConversation(conversation.id)}
+            users={chat.users}
+          />
+        ))}
+      </div>
+    </aside>
   );
 }
 
