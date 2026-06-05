@@ -40,18 +40,19 @@ export function useChatStore() {
     markConversationAsRead(conversationId);
   }
 
-  function sendMessage(body) {
+  function sendMessage(body, attachment = null) {
     const trimmedBody = body.trim();
 
-    if (!trimmedBody || !activeConversationId) {
+    if ((!trimmedBody && !attachment) || !activeConversationId) {
       return;
     }
 
     const nextMessage = createMessage({
       id: `m-${Date.now()}`,
       authorId: demoUser.id,
-      body: trimmedBody,
+      body: trimmedBody || `Shared ${attachment.name}`,
       createdAt: new Date().toISOString(),
+      attachment,
       status: messageStatus.SENT,
     });
 

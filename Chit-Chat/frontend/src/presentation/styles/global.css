@@ -460,12 +460,67 @@ h1 {
   padding: 14px 18px;
 }
 
+.attachment-preview {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: min(420px, 100%);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--amber);
+}
+
+.attachment-preview span {
+  min-width: 0;
+}
+
+.attachment-preview strong,
+.attachment-preview small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-preview small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.attachment-preview button {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.attachment-preview button:hover {
+  background: rgba(255, 107, 131, 0.13);
+  color: var(--danger);
+}
+
 .composer input {
   min-height: 48px;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 0 14px;
   background: #101317;
+}
+
+.file-trigger {
+  cursor: pointer;
+}
+
+.file-trigger input {
+  display: none;
 }
 
 .send-button {

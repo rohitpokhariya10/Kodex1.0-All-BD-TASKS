@@ -249,15 +249,17 @@ function MessageTimeline({ conversation, currentUser, onDeleteMessage, users }) 
 
 function Composer({ conversation, onSendMessage }) {
   const [draft, setDraft] = useState('');
-  const canSend = draft.trim().length > 0;
+  const [attachment, setAttachment] = useState(null);
+  const canSend = draft.trim().length > 0 || Boolean(attachment);
 
   function submitMessage() {
     if (!canSend) {
       return;
     }
 
-    onSendMessage(draft);
+    onSendMessage(draft, attachment);
     setDraft('');
+    setAttachment(null);
   }
 
   function handleKeyDown(event) {
@@ -267,11 +269,41 @@ function Composer({ conversation, onSendMessage }) {
     }
   }
 
+  function handleFileSelect(event) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    setAttachment({
+      id: `attachment-${Date.now()}`,
+      name: file.name,
+      size: formatFileSize(file.size),
+      type: file.type || 'application/octet-stream',
+      previewKind: file.type.startsWith('image/') ? 'image' : 'file',
+    });
+    event.target.value = '';
+  }
+
   return (
     <footer className="composer">
-      <button type="button" className="icon-button" aria-label="Attach file">
+      {attachment && (
+        <div className="attachment-preview">
+          {attachment.previewKind === 'image' ? <Image size={18} /> : <Paperclip size={18} />}
+          <span>
+            <strong>{attachment.name}</strong>
+            <small>{attachment.size}</small>
+          </span>
+          <button type="button" aria-label="Remove attachment" onClick={() => setAttachment(null)}>
+            <X size={16} />
+          </button>
+        </div>
+      )}
+      <label className="icon-button file-trigger" aria-label="Attach file">
         <Paperclip size={20} />
-      </button>
+        <input type="file" onChange={handleFileSelect} />
+      </label>
       <input
         type="text"
         placeholder={`Message ${conversation.title}`}
@@ -279,9 +311,10 @@ function Composer({ conversation, onSendMessage }) {
         onChange={(event) => setDraft(event.target.value)}
         onKeyDown={handleKeyDown}
       />
-      <button type="button" className="icon-button" aria-label="Attach image">
+      <label className="icon-button file-trigger" aria-label="Attach image">
         <Image size={20} />
-      </button>
+        <input type="file" accept="image/*" onChange={handleFileSelect} />
+      </label>
       <button type="button" className="icon-button" aria-label="Insert emoji">
         <Smile size={20} />
       </button>
@@ -299,6 +332,18 @@ function Composer({ conversation, onSendMessage }) {
       </button>
     </footer>
   );
+}
+
+function formatFileSize(size) {
+  if (size < 1024) {
+    return `${size} B`;
+  }
+
+  if (size < 1024 * 1024) {
+    return `${(size / 1024).toFixed(1)} KB`;
+  }
+
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function DetailsPanel({ conversation, members }) {
