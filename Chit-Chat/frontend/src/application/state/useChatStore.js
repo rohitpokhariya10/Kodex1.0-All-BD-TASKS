@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { conversationTypes, createConversation } from '../../domain/entities/conversation.js';
 import { messageStatus, createMessage } from '../../domain/entities/message.js';
 import { demoConversations, demoUser, demoUsers } from '../../infrastructure/seed/demoData.js';
 
@@ -105,11 +106,45 @@ export function useChatStore() {
     );
   }
 
+  function createGroup({ title, memberIds }) {
+    const trimmedTitle = title.trim();
+
+    if (!trimmedTitle || memberIds.length === 0) {
+      return;
+    }
+
+    const uniqueMemberIds = Array.from(new Set([demoUser.id, ...memberIds]));
+    const createdAt = new Date().toISOString();
+    const groupConversation = createConversation({
+      id: `c-group-${Date.now()}`,
+      type: conversationTypes.GROUP,
+      title: trimmedTitle,
+      memberIds: uniqueMemberIds,
+      currentUserId: demoUser.id,
+      messages: [
+        createMessage({
+          id: `m-system-${Date.now()}`,
+          authorId: demoUser.id,
+          body: `Created ${trimmedTitle} with ${uniqueMemberIds.length - 1} members.`,
+          createdAt,
+          readAt: createdAt,
+          status: messageStatus.READ,
+        }),
+      ],
+    });
+
+    setConversations((current) => [groupConversation, ...current]);
+    setActiveConversationId(groupConversation.id);
+    setFilter('all');
+    setQuery('');
+  }
+
   return {
     activeConversation,
     activeConversationId,
     activeMembers,
     conversations: filteredConversations,
+    createGroup,
     currentUser: demoUser,
     deleteMessage,
     filter,

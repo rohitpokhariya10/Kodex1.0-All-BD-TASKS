@@ -17,6 +17,7 @@ import {
   Trash2,
   Users,
   Video,
+  X,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useChatStore } from '../../application/state/useChatStore.js';
@@ -26,6 +27,7 @@ import { formatMessageTime } from '../utils/date.js';
 
 export function ChatWorkspace() {
   const chat = useChatStore();
+  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
 
   return (
     <main className="workspace-shell">
@@ -50,7 +52,12 @@ export function ChatWorkspace() {
             <p className="eyebrow">PulseDesk</p>
             <h1>Messages</h1>
           </div>
-          <button type="button" className="icon-button solid" aria-label="Create group">
+          <button
+            type="button"
+            className="icon-button solid"
+            aria-label="Create group"
+            onClick={() => setIsGroupModalOpen(true)}
+          >
             <CirclePlus size={20} />
           </button>
         </header>
@@ -112,6 +119,18 @@ export function ChatWorkspace() {
       </section>
 
       <DetailsPanel conversation={chat.activeConversation} members={chat.activeMembers} />
+
+      {isGroupModalOpen && (
+        <CreateGroupModal
+          currentUserId={chat.currentUser.id}
+          onClose={() => setIsGroupModalOpen(false)}
+          onCreate={(payload) => {
+            chat.createGroup(payload);
+            setIsGroupModalOpen(false);
+          }}
+          users={chat.users}
+        />
+      )}
     </main>
   );
 }
@@ -319,5 +338,94 @@ function DetailsPanel({ conversation, members }) {
         </button>
       </section>
     </aside>
+  );
+}
+
+function CreateGroupModal({ currentUserId, onClose, onCreate, users }) {
+  const availableUsers = users.filter((user) => user.id !== currentUserId);
+  const [title, setTitle] = useState('');
+  const [selectedMemberIds, setSelectedMemberIds] = useState(
+    availableUsers.slice(0, 2).map((user) => user.id),
+  );
+  const canCreate = title.trim().length >= 3 && selectedMemberIds.length > 0;
+
+  function toggleMember(userId) {
+    setSelectedMemberIds((current) =>
+      current.includes(userId)
+        ? current.filter((memberId) => memberId !== userId)
+        : [...current, userId],
+    );
+  }
+
+  function submitGroup() {
+    if (!canCreate) {
+      return;
+    }
+
+    onCreate({
+      title,
+      memberIds: selectedMemberIds,
+    });
+  }
+
+  return (
+    <div className="modal-backdrop" role="presentation">
+      <section className="group-modal" role="dialog" aria-modal="true" aria-labelledby="create-group-title">
+        <header className="modal-header">
+          <div>
+            <p className="eyebrow">Group chat</p>
+            <h2 id="create-group-title">Create new room</h2>
+          </div>
+          <button type="button" className="icon-button" aria-label="Close modal" onClick={onClose}>
+            <X size={19} />
+          </button>
+        </header>
+
+        <label className="group-field">
+          <span>Room name</span>
+          <span className="group-input">
+            <Hash size={18} />
+            <input
+              type="text"
+              placeholder="Project launch team"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+            />
+          </span>
+        </label>
+
+        <section className="member-picker" aria-label="Select members">
+          <h3>Select members</h3>
+          {availableUsers.map((user) => {
+            const isSelected = selectedMemberIds.includes(user.id);
+
+            return (
+              <button
+                type="button"
+                key={user.id}
+                className={`picker-row ${isSelected ? 'selected' : ''}`}
+                onClick={() => toggleMember(user.id)}
+              >
+                <Avatar user={user} size="sm" />
+                <span>
+                  <strong>{user.name}</strong>
+                  <small>{user.email}</small>
+                </span>
+                <i aria-hidden="true">{isSelected ? 'Selected' : 'Add'}</i>
+              </button>
+            );
+          })}
+        </section>
+
+        <footer className="modal-actions">
+          <button type="button" className="secondary-action" onClick={onClose}>
+            Cancel
+          </button>
+          <button type="button" className="create-action" disabled={!canCreate} onClick={submitGroup}>
+            Create group
+          </button>
+        </footer>
+      </section>
+    </div>
   );
 }
