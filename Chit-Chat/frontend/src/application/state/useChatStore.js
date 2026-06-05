@@ -35,9 +35,47 @@ export function useChatStore() {
       .filter(Boolean);
   }, [activeConversation]);
 
+  const notifications = useMemo(() => {
+    return conversations
+      .map((conversation) => {
+        const unreadMessages = conversation.messages.filter(
+          (message) => !message.readAt && message.authorId !== demoUser.id && !message.deletedAt,
+        );
+        const latestUnread = unreadMessages.at(-1);
+
+        if (!latestUnread) {
+          return null;
+        }
+
+        const author = demoUsers.find((user) => user.id === latestUnread.authorId);
+
+        return {
+          id: `notification-${conversation.id}`,
+          conversationId: conversation.id,
+          conversationTitle: conversation.title,
+          count: unreadMessages.length,
+          message: latestUnread.attachment
+            ? `${author?.name ?? 'Someone'} shared ${latestUnread.attachment.name}`
+            : latestUnread.body,
+          createdAt: latestUnread.createdAt,
+        };
+      })
+      .filter(Boolean)
+      .sort((first, second) => new Date(second.createdAt) - new Date(first.createdAt));
+  }, [conversations]);
+
+  const totalUnread = useMemo(
+    () => conversations.reduce((total, conversation) => total + conversation.unreadCount, 0),
+    [conversations],
+  );
+
   function selectConversation(conversationId) {
     setActiveConversationId(conversationId);
     markConversationAsRead(conversationId);
+  }
+
+  function openNotification(conversationId) {
+    selectConversation(conversationId);
   }
 
   function sendMessage(body, attachment = null) {
@@ -149,11 +187,14 @@ export function useChatStore() {
     currentUser: demoUser,
     deleteMessage,
     filter,
+    notifications,
+    openNotification,
     query,
     selectConversation,
     sendMessage,
     setFilter,
     setQuery,
+    totalUnread,
     users: demoUsers,
   };
 }

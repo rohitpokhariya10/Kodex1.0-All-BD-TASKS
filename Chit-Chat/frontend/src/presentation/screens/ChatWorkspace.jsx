@@ -28,6 +28,7 @@ import { formatMessageTime } from '../utils/date.js';
 export function ChatWorkspace() {
   const chat = useChatStore();
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
   return (
     <main className="workspace-shell">
@@ -38,8 +39,14 @@ export function ChatWorkspace() {
         <button type="button" className="icon-button active" aria-label="Messages">
           <MessageSquareText size={20} />
         </button>
-        <button type="button" className="icon-button" aria-label="Notifications">
+        <button
+          type="button"
+          className={`icon-button badge-button ${isNotificationOpen ? 'active' : ''}`}
+          aria-label="Notifications"
+          onClick={() => setIsNotificationOpen((current) => !current)}
+        >
           <Bell size={20} />
+          {chat.totalUnread > 0 && <span>{chat.totalUnread}</span>}
         </button>
         <button type="button" className="icon-button" aria-label="Settings">
           <Settings size={20} />
@@ -119,6 +126,17 @@ export function ChatWorkspace() {
       </section>
 
       <DetailsPanel conversation={chat.activeConversation} members={chat.activeMembers} />
+
+      {isNotificationOpen && (
+        <NotificationCenter
+          notifications={chat.notifications}
+          onClose={() => setIsNotificationOpen(false)}
+          onOpenConversation={(conversationId) => {
+            chat.openNotification(conversationId);
+            setIsNotificationOpen(false);
+          }}
+        />
+      )}
 
       {isGroupModalOpen && (
         <CreateGroupModal
@@ -382,6 +400,50 @@ function DetailsPanel({ conversation, members }) {
           <ShieldCheck size={18} /> Privacy status
         </button>
       </section>
+    </aside>
+  );
+}
+
+function NotificationCenter({ notifications, onClose, onOpenConversation }) {
+  return (
+    <aside className="notification-center" aria-label="Notification center">
+      <header>
+        <div>
+          <p className="eyebrow">Inbox</p>
+          <h2>Notifications</h2>
+        </div>
+        <button type="button" className="icon-button" aria-label="Close notifications" onClick={onClose}>
+          <X size={19} />
+        </button>
+      </header>
+
+      {notifications.length === 0 ? (
+        <div className="empty-state">
+          <Bell size={24} />
+          <strong>All caught up</strong>
+          <p>No unread messages right now.</p>
+        </div>
+      ) : (
+        <div className="notification-list">
+          {notifications.map((notification) => (
+            <button
+              type="button"
+              key={notification.id}
+              className="notification-item"
+              onClick={() => onOpenConversation(notification.conversationId)}
+            >
+              <span className="notification-icon">
+                <Bell size={17} />
+              </span>
+              <span>
+                <strong>{notification.conversationTitle}</strong>
+                <small>{notification.message}</small>
+              </span>
+              <i>{notification.count}</i>
+            </button>
+          ))}
+        </div>
+      )}
     </aside>
   );
 }
