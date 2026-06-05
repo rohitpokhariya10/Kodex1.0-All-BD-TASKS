@@ -31,6 +31,8 @@ export function ChatWorkspace() {
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isMessageSearchOpen, setIsMessageSearchOpen] = useState(false);
+  const [messageSearchQuery, setMessageSearchQuery] = useState('');
 
   return (
     <main className="workspace-shell">
@@ -121,12 +123,36 @@ export function ChatWorkspace() {
         <ChatHeader
           conversation={chat.activeConversation}
           currentUser={chat.currentUser}
+          isSearchOpen={isMessageSearchOpen}
           members={chat.activeMembers}
+          onToggleSearch={() => setIsMessageSearchOpen((current) => !current)}
           typingUsers={chat.activeTypingUsers}
         />
+        {isMessageSearchOpen && (
+          <label className="message-search-bar">
+            <Search size={18} />
+            <input
+              type="search"
+              placeholder={`Search in ${chat.activeConversation.title}`}
+              value={messageSearchQuery}
+              onChange={(event) => setMessageSearchQuery(event.target.value)}
+            />
+            {messageSearchQuery && (
+              <button
+                type="button"
+                className="icon-button"
+                aria-label="Clear message search"
+                onClick={() => setMessageSearchQuery('')}
+              >
+                <X size={17} />
+              </button>
+            )}
+          </label>
+        )}
         <MessageTimeline
           conversation={chat.activeConversation}
           currentUser={chat.currentUser}
+          searchQuery={messageSearchQuery}
           onDeleteMessage={chat.deleteMessage}
           typingUsers={chat.activeTypingUsers}
           users={chat.users}
@@ -211,7 +237,7 @@ function ConversationItem({ conversation, currentUser, isActive, onSelect, users
   );
 }
 
-function ChatHeader({ conversation, currentUser, members, typingUsers }) {
+function ChatHeader({ conversation, currentUser, isSearchOpen, members, onToggleSearch, typingUsers }) {
   const visibleMembers = members.filter((member) => member.id !== currentUser.id);
   const onlineCount = members.filter((member) => member.status === 'online').length;
   const statusText = getTypingText(typingUsers, currentUser)
@@ -235,6 +261,14 @@ function ChatHeader({ conversation, currentUser, members, typingUsers }) {
         </div>
       </div>
       <div className="header-actions">
+        <button
+          type="button"
+          className={`icon-button ${isSearchOpen ? 'active' : ''}`}
+          aria-label="Search messages"
+          onClick={onToggleSearch}
+        >
+          <Search size={19} />
+        </button>
         <button type="button" className="icon-button" aria-label="Start voice call">
           <Phone size={19} />
         </button>
@@ -249,11 +283,27 @@ function ChatHeader({ conversation, currentUser, members, typingUsers }) {
   );
 }
 
-function MessageTimeline({ conversation, currentUser, onDeleteMessage, typingUsers, users }) {
+function MessageTimeline({ conversation, currentUser, onDeleteMessage, searchQuery, typingUsers, users }) {
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+  const visibleMessages = normalizedSearchQuery
+    ? conversation.messages.filter((message) => {
+        const searchableText = `${message.body} ${message.attachment?.name ?? ''}`.toLowerCase();
+
+        return searchableText.includes(normalizedSearchQuery);
+      })
+    : conversation.messages;
+
   return (
     <div className="message-timeline">
       <span className="day-divider">Today</span>
-      {conversation.messages.map((message) => {
+      {visibleMessages.length === 0 && normalizedSearchQuery && (
+        <div className="message-search-empty">
+          <Search size={22} />
+          <strong>No message found</strong>
+          <p>Try another word or clear the search.</p>
+        </div>
+      )}
+      {visibleMessages.map((message) => {
         const author = users.find((user) => user.id === message.authorId) ?? currentUser;
         const isOwn = message.authorId === currentUser.id;
 
@@ -273,11 +323,15 @@ function MessageTimeline({ conversation, currentUser, onDeleteMessage, typingUse
                   <Trash2 size={14} />
                 </button>
               </div>
-              <p>{message.deletedAt ? 'This message was deleted.' : message.body}</p>
+              <p>
+                {message.deletedAt
+                  ? 'This message was deleted.'
+                  : highlightMessageText(message.body, searchQuery)}
+              </p>
               {message.attachment && (
                 <div className="attachment-card">
                   <Image size={18} />
-                  <span>{message.attachment.name}</span>
+                  <span>{highlightMessageText(message.attachment.name, searchQuery)}</span>
                   <small>{message.attachment.size}</small>
                 </div>
               )}
@@ -290,6 +344,30 @@ function MessageTimeline({ conversation, currentUser, onDeleteMessage, typingUse
         <p className="typing-line">{getTypingText(typingUsers, currentUser)}</p>
       )}
     </div>
+  );
+}
+
+function highlightMessageText(text, query) {
+  const trimmedQuery = query.trim();
+
+  if (!trimmedQuery) {
+    return text;
+  }
+
+  const lowerText = text.toLowerCase();
+  const lowerQuery = trimmedQuery.toLowerCase();
+  const matchIndex = lowerText.indexOf(lowerQuery);
+
+  if (matchIndex === -1) {
+    return text;
+  }
+
+  return (
+    <>
+      {text.slice(0, matchIndex)}
+      <mark>{text.slice(matchIndex, matchIndex + trimmedQuery.length)}</mark>
+      {text.slice(matchIndex + trimmedQuery.length)}
+    </>
   );
 }
 
