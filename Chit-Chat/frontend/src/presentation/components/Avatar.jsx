@@ -1,3 +1,5 @@
+import React from 'react';
+
 export function Avatar({ user, size = 'md' }) {
   return (
     <span className={`avatar avatar-${size}`} title={user.name}>

@@ -7,6 +7,7 @@ import {
   Image,
   Info,
   Inbox,
+  LogOut,
   Menu,
   MessageSquareText,
   Mic,
@@ -24,14 +25,16 @@ import {
   Video,
   X,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useChatStore } from '../../application/state/useChatStore.js';
 import { conversationTypes } from '../../domain/entities/conversation.js';
 import { Avatar } from '../components/Avatar.jsx';
 import { formatMessageTime } from '../utils/date.js';
 
-export function ChatWorkspace() {
+export function ChatWorkspace({ onLogout }) {
   const chat = useChatStore();
+  const [conversationRailWidth, setConversationRailWidth] = useState(390);
+  const [detailsPanelWidth, setDetailsPanelWidth] = useState(350);
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -39,8 +42,48 @@ export function ChatWorkspace() {
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [messageSearchQuery, setMessageSearchQuery] = useState('');
 
+  function startPanelResize(panel, event) {
+    event.preventDefault();
+    const startX = event.clientX;
+    const startConversationRailWidth = conversationRailWidth;
+    const startDetailsPanelWidth = detailsPanelWidth;
+
+    document.body.classList.add('is-resizing-panels');
+
+    function handlePointerMove(moveEvent) {
+      const deltaX = moveEvent.clientX - startX;
+
+      if (panel === 'conversation') {
+        setConversationRailWidth(clamp(startConversationRailWidth + deltaX, 300, 500));
+        return;
+      }
+
+      setDetailsPanelWidth(clamp(startDetailsPanelWidth - deltaX, 280, 460));
+    }
+
+    function stopResize() {
+      document.body.classList.remove('is-resizing-panels');
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', stopResize);
+    }
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', stopResize, { once: true });
+  }
+
+  function resetPanelSizes() {
+    setConversationRailWidth(390);
+    setDetailsPanelWidth(350);
+  }
+
   return (
-    <main className="workspace-shell">
+    <main
+      className="workspace-shell"
+      style={{
+        '--conversation-rail-width': `${conversationRailWidth}px`,
+        '--details-panel-width': `${detailsPanelWidth}px`,
+      }}
+    >
       <aside className="nav-rail" aria-label="Primary navigation">
         <span className="product-mark">
           <MessageSquareText size={24} />
@@ -65,12 +108,28 @@ export function ChatWorkspace() {
         >
           <Settings size={20} />
         </button>
+        <button
+          type="button"
+          className="icon-button nav-logout-button"
+          aria-label="Log out"
+          onClick={onLogout}
+        >
+          <LogOut size={20} />
+        </button>
       </aside>
 
       <ConversationRail
         chat={chat}
         onCreateGroup={() => setIsGroupModalOpen(true)}
+        onOpenSettings={() => setIsSettingsOpen(true)}
         onSelectConversation={(conversationId) => chat.selectConversation(conversationId)}
+      />
+
+      <ResizeHandle
+        className="conversation-resize-handle"
+        label="Resize conversation list"
+        onDoubleClick={resetPanelSizes}
+        onPointerDown={(event) => startPanelResize('conversation', event)}
       />
 
       <section className="chat-panel" aria-label="Active conversation">
@@ -127,6 +186,13 @@ export function ChatWorkspace() {
         />
       </section>
 
+      <ResizeHandle
+        className="details-resize-handle"
+        label="Resize details panel"
+        onDoubleClick={resetPanelSizes}
+        onPointerDown={(event) => startPanelResize('details', event)}
+      />
+
       <DetailsPanel
         conversation={chat.activeConversation}
         members={chat.activeMembers}
@@ -166,6 +232,10 @@ export function ChatWorkspace() {
                 chat.selectConversation(conversationId);
                 setIsMobileDrawerOpen(false);
               }}
+              onOpenSettings={() => {
+                setIsSettingsOpen(true);
+                setIsMobileDrawerOpen(false);
+              }}
             />
           </aside>
         </div>
@@ -189,6 +259,7 @@ export function ChatWorkspace() {
           onPreviewError={chat.previewErrorState}
           onPreviewLoading={chat.previewLoadingState}
           onRecoverConnection={chat.recoverConnection}
+          onLogout={onLogout}
           onUpdatePresence={chat.updatePresence}
           status={chat.connectionStatus}
         />
@@ -209,7 +280,26 @@ export function ChatWorkspace() {
   );
 }
 
-function ConversationRail({ chat, onCreateGroup, onSelectConversation }) {
+function ResizeHandle({ className, label, onDoubleClick, onPointerDown }) {
+  return (
+    <button
+      type="button"
+      className={`panel-resize-handle ${className}`}
+      aria-label={label}
+      title={`${label}. Double click to reset.`}
+      onDoubleClick={onDoubleClick}
+      onPointerDown={onPointerDown}
+    >
+      <span />
+    </button>
+  );
+}
+
+function clamp(value, minimum, maximum) {
+  return Math.min(Math.max(value, minimum), maximum);
+}
+
+function ConversationRail({ chat, onCreateGroup, onOpenSettings, onSelectConversation }) {
   const isSyncing = chat.connectionStatus === 'syncing';
   const hasError = chat.connectionStatus === 'error';
   const hasNoConversations = chat.conversations.length === 0;
@@ -230,6 +320,17 @@ function ConversationRail({ chat, onCreateGroup, onSelectConversation }) {
           <CirclePlus size={20} />
         </button>
       </header>
+
+      <button type="button" className="account-strip" onClick={onOpenSettings}>
+        <Avatar user={chat.currentUser} />
+        <span>
+          <strong>{chat.currentUser.name}</strong>
+          <small>
+            <i className={`presence-swatch presence-${chat.currentUser.status}`} />
+            {chat.currentUser.status} / {chat.connectionStatus}
+          </small>
+        </span>
+      </button>
 
       <label className="search-field">
         <Search size={18} />
@@ -256,6 +357,11 @@ function ConversationRail({ chat, onCreateGroup, onSelectConversation }) {
             {label}
           </button>
         ))}
+      </div>
+
+      <div className="rail-summary">
+        <span>{chat.conversations.length} conversations</span>
+        {chat.totalUnread > 0 && <strong>{chat.totalUnread} unread</strong>}
       </div>
 
       {isSyncing && <ConversationSkeletonList />}
@@ -338,6 +444,7 @@ function ConversationItem({ conversation, currentUser, isActive, onSelect, users
     (user) => conversation.memberIds.includes(user.id) && user.id !== currentUser.id,
   );
   const lastMessage = conversation.messages.at(-1);
+  const lastActivityTime = lastMessage ? formatMessageTime(lastMessage.createdAt) : '';
 
   return (
     <button
@@ -353,10 +460,13 @@ function ConversationItem({ conversation, currentUser, isActive, onSelect, users
         <Avatar user={directUser} />
       )}
       <span className="conversation-copy">
-        <strong>
-          {isGroup && <Hash size={14} />}
-          {conversation.title}
-        </strong>
+        <span className="conversation-title-line">
+          <strong>
+            {isGroup && <Hash size={14} />}
+            {conversation.title}
+          </strong>
+          {lastActivityTime && <time>{lastActivityTime}</time>}
+        </span>
         <small>{lastMessage?.body ?? 'No messages yet'}</small>
       </span>
       {conversation.unreadCount > 0 && <span className="unread-badge">{conversation.unreadCount}</span>}
@@ -384,7 +494,10 @@ function ChatHeader({ conversation, currentUser, isSearchOpen, members, onToggle
         </div>
         <div>
           <h2>{conversation.title}</h2>
-          <p>{statusText}</p>
+          <p>
+            <span className="live-status-dot" />
+            {statusText}
+          </p>
         </div>
       </div>
       <div className="header-actions">
@@ -521,7 +634,7 @@ function Composer({ conversation, currentUser, onSendMessage, onTypingChange }) 
   }
 
   function handleKeyDown(event) {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       submitMessage();
     }
@@ -562,9 +675,9 @@ function Composer({ conversation, currentUser, onSendMessage, onTypingChange }) 
         <Paperclip size={20} />
         <input type="file" onChange={handleFileSelect} />
       </label>
-      <input
-        type="text"
+      <textarea
         placeholder={`Message ${conversation.title}`}
+        rows={1}
         value={draft}
         onChange={(event) => setDraft(event.target.value)}
         onKeyDown={handleKeyDown}
@@ -773,6 +886,7 @@ function NotificationCenter({ notifications, onClose, onOpenConversation }) {
 function SettingsPanel({
   currentUser,
   onClose,
+  onLogout,
   onPreviewError,
   onPreviewLoading,
   onRecoverConnection,
@@ -864,6 +978,13 @@ function SettingsPanel({
           <strong>Backend handoff ready</strong>
           <small>Map this panel to profile, status, and preferences APIs.</small>
         </div>
+      </section>
+
+      <section className="settings-section logout-section">
+        <button type="button" className="logout-action" onClick={onLogout}>
+          <LogOut size={17} />
+          Log out
+        </button>
       </section>
     </aside>
   );
