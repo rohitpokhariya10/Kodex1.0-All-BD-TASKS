@@ -23,6 +23,15 @@ Implemented routes:
 - `POST /api/conversations/:conversationId/messages`
 - `PATCH /api/conversations/:conversationId/read`
 
+## Feature 3: Group Chat
+
+Implemented routes:
+
+- `POST /api/groups`
+- `GET /api/conversations/:conversationId`
+
+Group conversations use the same message history, send message, and mark-read routes as direct conversations.
+
 ## Run Locally
 
 ```bash

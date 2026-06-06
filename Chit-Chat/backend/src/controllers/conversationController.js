@@ -9,6 +9,11 @@ export const createDirectConversationSchema = z.object({
   participantId: z.string().trim().min(1),
 });
 
+export const createGroupSchema = z.object({
+  memberIds: z.array(z.string().trim().min(1)).min(1),
+  title: z.string().trim().min(2).max(80),
+});
+
 export const sendMessageSchema = z.object({
   body: z.string().trim().min(1).max(2000),
 });
@@ -60,6 +65,59 @@ export async function createDirectConversation(req, res, next) {
     await conversation.populate('memberIds', 'name email status lastSeenAt');
 
     res.status(statusCode).json({
+      conversation: await serializeConversation(conversation, req.user._id),
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function createGroup(req, res, next) {
+  try {
+    const requestedMemberIds = [...new Set(req.body.memberIds)];
+
+    requestedMemberIds.forEach((memberId) => {
+      assertObjectId(memberId, 'One or more member ids are invalid.');
+    });
+
+    const memberIds = [...new Set([req.user.id, ...requestedMemberIds])];
+
+    if (memberIds.length < 3) {
+      throw new HttpError(400, 'A group chat needs at least three members including you.');
+    }
+
+    const existingMemberCount = await User.countDocuments({ _id: { $in: memberIds } });
+
+    if (existingMemberCount !== memberIds.length) {
+      throw new HttpError(404, 'One or more group members were not found.');
+    }
+
+    let conversation = await Conversation.create({
+      createdBy: req.user._id,
+      memberIds,
+      title: req.body.title,
+      type: conversationTypes.GROUP,
+    });
+
+    conversation = await Conversation.findById(conversation._id).populate(
+      'memberIds',
+      'name email status lastSeenAt',
+    );
+
+    res.status(201).json({
+      conversation: await serializeConversation(conversation, req.user._id),
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getConversation(req, res, next) {
+  try {
+    const conversation = await requireConversationMember(req.params.conversationId, req.user._id);
+    await conversation.populate('memberIds', 'name email status lastSeenAt');
+
+    res.json({
       conversation: await serializeConversation(conversation, req.user._id),
     });
   } catch (error) {
