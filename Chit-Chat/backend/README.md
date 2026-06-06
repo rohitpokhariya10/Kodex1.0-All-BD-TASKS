@@ -12,6 +12,17 @@ Implemented routes:
 - `PATCH /api/auth/presence`
 - `GET /api/health`
 
+## Feature 2: One-to-One Chat
+
+Implemented routes:
+
+- `GET /api/users`
+- `GET /api/conversations`
+- `POST /api/conversations/direct`
+- `GET /api/conversations/:conversationId/messages`
+- `POST /api/conversations/:conversationId/messages`
+- `PATCH /api/conversations/:conversationId/read`
+
 ## Run Locally
 
 ```bash

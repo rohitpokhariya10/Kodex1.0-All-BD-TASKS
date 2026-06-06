@@ -5,6 +5,8 @@ import morgan from 'morgan';
 import { env } from './config/env.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { authRoutes } from './routes/authRoutes.js';
+import { conversationRoutes } from './routes/conversationRoutes.js';
+import { userRoutes } from './routes/userRoutes.js';
 
 export function createApp() {
   const app = express();
@@ -27,6 +29,8 @@ export function createApp() {
   });
 
   app.use('/api/auth', authRoutes);
+  app.use('/api/users', userRoutes);
+  app.use('/api/conversations', conversationRoutes);
   app.use(notFoundHandler);
   app.use(errorHandler);
 
