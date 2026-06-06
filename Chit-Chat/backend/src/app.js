@@ -7,6 +7,7 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { authRoutes } from './routes/authRoutes.js';
 import { conversationRoutes } from './routes/conversationRoutes.js';
 import { groupRoutes } from './routes/groupRoutes.js';
+import { messageRoutes } from './routes/messageRoutes.js';
 import { userRoutes } from './routes/userRoutes.js';
 
 export function createApp() {
@@ -33,6 +34,7 @@ export function createApp() {
   app.use('/api/users', userRoutes);
   app.use('/api/groups', groupRoutes);
   app.use('/api/conversations', conversationRoutes);
+  app.use('/api/messages', messageRoutes);
   app.use(notFoundHandler);
   app.use(errorHandler);
 

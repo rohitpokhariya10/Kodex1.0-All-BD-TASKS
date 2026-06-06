@@ -45,6 +45,14 @@ Implemented events:
 
 Sockets authenticate with the same JWT sent through `auth.token`.
 
+## Feature 5: Message Deletion
+
+Implemented routes:
+
+- `DELETE /api/messages/:messageId`
+
+Message deletion is author-only and uses soft deletes so deleted records remain auditable.
+
 ## Run Locally
 
 ```bash

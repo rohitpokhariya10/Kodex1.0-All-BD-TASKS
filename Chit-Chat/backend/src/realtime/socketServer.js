@@ -2,6 +2,7 @@ import { Server } from 'socket.io';
 import { Conversation } from '../models/Conversation.js';
 import { Message } from '../models/Message.js';
 import { presenceStates, User } from '../models/User.js';
+import { deleteOwnMessage } from '../services/messageService.js';
 import { verifyAuthToken } from '../utils/jwt.js';
 import { serializeMessage } from '../utils/serializers.js';
 
@@ -90,6 +91,26 @@ export function createSocketServer(httpServer, { corsOrigin }) {
 
         socket.to(conversationRoom(conversation.id)).emit('typing:update', payload);
         ack?.({ ok: true });
+      } catch (error) {
+        emitSocketError(socket, ack, error);
+      }
+    });
+
+    socket.on('message:delete', async ({ messageId } = {}, ack) => {
+      try {
+        if (!messageId) {
+          throw new Error('Message id is required.');
+        }
+
+        const { conversation, message } = await deleteOwnMessage({ messageId, user });
+        const payload = {
+          conversationId: conversation.id,
+          deletedAt: message.deletedAt,
+          messageId: message.id,
+        };
+
+        io.to(conversationRoom(conversation.id)).emit('message:deleted', payload);
+        ack?.({ ok: true, ...payload });
       } catch (error) {
         emitSocketError(socket, ack, error);
       }
