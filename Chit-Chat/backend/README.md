@@ -32,6 +32,19 @@ Implemented routes:
 
 Group conversations use the same message history, send message, and mark-read routes as direct conversations.
 
+## Feature 4: Socket.IO Realtime
+
+Implemented events:
+
+- `conversation:join`
+- `conversation:leave`
+- `message:send`
+- `message:new`
+- `typing:update`
+- `presence:update`
+
+Sockets authenticate with the same JWT sent through `auth.token`.
+
 ## Run Locally
 
 ```bash
