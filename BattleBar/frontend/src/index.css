@@ -1,12 +1,2 @@
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Rajdhani:wght@500;600;700&display=swap");
 @import "tailwindcss";
-
-* {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
-}
-html,
-body {
-height: 100%;
-width: 100%;
-}
