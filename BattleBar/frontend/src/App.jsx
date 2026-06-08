@@ -28,6 +28,7 @@ const App = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatAnchorPosition, setChatAnchorPosition] = useState({ x: 12, y: 12 });
   const [messages, setMessages] = useState([]);
+  const [activeChatTeam, setActiveChatTeam] = useState("blue");
 
   //
   const [gameState, setGameState] = useState({
@@ -69,7 +70,7 @@ const App = () => {
 
     socket.emit("sendChatMessage", {
       text: messageText,
-      team: "blue",
+      team: activeChatTeam,
       username: "Player",
     });
   };
@@ -80,10 +81,12 @@ const App = () => {
   };
 
   const handleBlueTap = () => {
+    setActiveChatTeam("blue");
     socket.emit("teamClick", "blue");
     console.log("blue");
   };
   const handleRedTap = () => {
+    setActiveChatTeam("red");
     socket.emit("teamClick", "red");
     console.log("red");
   };
@@ -109,6 +112,7 @@ const App = () => {
           anchorPosition={chatAnchorPosition}
           messages={messages}
           onSendMessage={sendChatMessage}
+          tone={activeChatTeam}
         />
 
         <ResetOnlyHud onReset={handleReset} timer={gameState.timeLeft} />

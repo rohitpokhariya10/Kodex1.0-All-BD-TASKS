@@ -138,11 +138,11 @@ const ChatDrawer = ({
             onChange={(event) => setCustomMessage(event.target.value)}
             maxLength={80}
             placeholder="Type..."
-            className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 font-['Rajdhani',ui-sans-serif] text-[11px] font-semibold text-white outline-none placeholder:text-white/30 focus:border-cyan-300/35 focus:bg-white/10"
+            className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 font-['Rajdhani',ui-sans-serif] text-[11px] font-semibold text-white outline-none placeholder:text-white/30 focus:border-white/25 focus:bg-white/10"
           />
           <button
             type="submit"
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-cyan-200/20 bg-cyan-400/15 text-cyan-50 transition hover:bg-cyan-400/25 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+            className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl border transition hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 ${theme.button}`}
             disabled={!customMessage.trim()}
             aria-label="Send chat message"
           >

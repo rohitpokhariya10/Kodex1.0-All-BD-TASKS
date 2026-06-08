@@ -1,0 +1,8 @@
+{
+  "name": "battlebar",
+  "private": true,
+  "scripts": {
+    "render-build": "npm install --prefix frontend && npm run build --prefix frontend && npm install --prefix backend && node -e \"const fs=require('fs');fs.rmSync('backend/public',{recursive:true,force:true});fs.cpSync('frontend/dist','backend/public',{recursive:true});\"",
+    "start": "npm start --prefix backend"
+  }
+}
