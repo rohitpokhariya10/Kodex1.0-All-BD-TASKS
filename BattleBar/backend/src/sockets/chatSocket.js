@@ -21,16 +21,17 @@ const chatSocket = (io) => {
     //   text: "GG",
     //   team: "blue"
     // }
-    socket.on("sendMessage", (messageData) => {
+    const handleIncomingMessage = (messageData) => {
       console.log("messageData comes from frontend -->", messageData);
 
       // Safely get the message text and remove extra spaces.
       // Optional chaining prevents backend crash if text is missing.
-      const text = messageData?.text?.trim();
+      const text = messageData?.text?.trim().slice(0, 120);
 
       // Get the team of the sender.
       // Example: "blue" or "red"
       const team = messageData?.team;
+      const username = messageData?.username?.trim().slice(0, 20) || "Player";
 
       // If message text is empty, do not save or send anything.
       if (!text) return;
@@ -42,6 +43,7 @@ const chatSocket = (io) => {
         id: `${Date.now()}-${socket.id}`, // Unique message id
         text, // Actual message text
         team, // Sender team: blue/red
+        username, // Sender display name
         senderId: socket.id, // Socket id of the user who sent the message
         createdAt: new Date().toISOString(), // Message created time
       };
@@ -57,8 +59,11 @@ const chatSocket = (io) => {
 
       // Send this new message to all connected users.
       // Everyone will receive this message in real time.
-      io.emit("chatMessage", newMessage);
-    });
+      io.emit("newChatMessage", newMessage);
+    };
+
+    socket.on("sendChatMessage", handleIncomingMessage);
+    socket.on("sendMessage", handleIncomingMessage);
 
     // This event runs when a user disconnects from the socket server.
     socket.on("disconnect", (reason) => {

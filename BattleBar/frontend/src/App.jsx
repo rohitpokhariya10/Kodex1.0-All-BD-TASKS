@@ -42,17 +42,16 @@ const App = () => {
     //console.log("useEffect mounted");
     //ye event backend se aya hoga and message bhi
 
-    //     chatHistory = old messages receive
+    //     chatHistory = old messages receive from backend
     socket.on("chatHistory", (oldmessage) => {
       setMessages(oldmessage);
     });
     // newChatMessage = new message receive
     socket.on("newChatMessage", (message) => {
-      setMessages((prev = [...prev, message]));
+      setMessages((prev) => [...prev, message]);
     });
     socket.on("gameState", (data) => {
       // console.log("GameState Data ----> ", data);
-
       setGameState(data); //backend se jo data arha hai vo bhi same yhi object hai overwrite ho jatega state variable me
     });
 
@@ -64,8 +63,12 @@ const App = () => {
   }, []);
 
   const sendChatMessage = (text) => {
+    const messageText = text.trim();
+
+    if (!messageText) return;
+
     socket.emit("sendChatMessage", {
-      text,
+      text: messageText,
       team: "blue",
       username: "Player",
     });
