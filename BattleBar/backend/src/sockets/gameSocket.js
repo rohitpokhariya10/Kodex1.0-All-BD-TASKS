@@ -1,7 +1,9 @@
 const { gameState, resetGameState } = require("../game/gameState");
 
+
 const gameSocket = (io) => {
   let gameTimer = null;
+
 
   const endGameByTime = () => {
     if (gameState.barValue > 50) {
@@ -18,7 +20,7 @@ const gameSocket = (io) => {
 
     gameTimer = setInterval(() => {
       gameState.timeLeft -= 1;
-
+      //agar time end hogya tuh dekhenge kon jeeta 
       if (gameState.timeLeft <= 0) {
         gameState.timeLeft = 0;
         endGameByTime();
@@ -33,6 +35,8 @@ const gameSocket = (io) => {
 
   io.on("connection", (socket) => {
     console.log("User connected", socket.id);
+
+  
 
     socket.emit("gameState", gameState);
 

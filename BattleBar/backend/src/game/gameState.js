@@ -4,7 +4,7 @@ const gameState = {
   blueClicks: 0,
   redClicks: 0,
   timeLeft: 60,
-  isGameRunning: false,
+
 };
 
 const resetGameState = () => {
@@ -13,7 +13,7 @@ const resetGameState = () => {
   gameState.blueClicks = 0;
   gameState.redClicks = 0;
   gameState.timeLeft = 60;
-  gameState.isGameRunning = false;
+
 };
 
 module.exports = { gameState, resetGameState };
