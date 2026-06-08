@@ -60,6 +60,7 @@ const chatSocket = (io) => {
       // Send this new message to all connected users.
       // Everyone will receive this message in real time.
       io.emit("newChatMessage", newMessage);
+      io.emit("chatMessage", newMessage);
     };
 
     socket.on("sendChatMessage", handleIncomingMessage);
