@@ -5,7 +5,13 @@ const gameSocket = require("./src/sockets/gameSocket");
 
 
 const httpServer = http.createServer(app);
-const io = new Server(httpServer);
+//Allow Socket.IO connections from my React frontend
+const io = new Server(httpServer , {
+    cors:{
+        origin:"http://localhost:5173",
+        
+    }
+});
 gameSocket(io);
 
 let port = 3000 || 8000;

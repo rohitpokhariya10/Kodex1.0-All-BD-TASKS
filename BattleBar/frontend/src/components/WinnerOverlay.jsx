@@ -1,4 +1,8 @@
-const WinnerOverlay = ({ winner }) => {
+import { socket } from "../socket"
+
+const WinnerOverlay = ({ winner , onReset , barValue}) => {
+ const bluePercent = barValue
+  const redPercent = 100 - bluePercent;
   return (
     <div className="absolute inset-0 z-40 grid place-items-center bg-black/72 px-5 backdrop-blur-md">
       <section className="w-full max-w-sm rounded-lg border border-white/15 bg-slate-950/95 p-5 text-center shadow-2xl shadow-black">
@@ -9,9 +13,10 @@ const WinnerOverlay = ({ winner }) => {
           {winner} Wins
         </h2>
         <p className="mt-3 text-sm font-semibold text-slate-300">
-          Final balance: Blue 52% / Red 48%
+         { `Final balance: Blue ${bluePercent} / Red ${redPercent}`}
         </p>
         <button
+         onClick={onReset}
           type="button"
           className="mt-5 min-h-12 w-full rounded-lg bg-white px-4 font-black uppercase tracking-[0.12em] text-slate-950 transition hover:bg-slate-200 active:scale-95"
         >
