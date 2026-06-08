@@ -1,3 +1,5 @@
+import { playTapSound } from "../utils/playTapSound";
+
 const teamThemes = {
   blue: {
     glow: "bg-cyan-300/35",
@@ -25,6 +27,11 @@ const TeamZone = ({
   bluePercent = 0,
   redPercent = 0,
 }) => {
+
+  const handleTapClick = () => {
+  playTapSound(tone);
+  onTap();
+};
   const isTop = position === "top";
   const theme = teamThemes[tone];
 
@@ -51,7 +58,7 @@ const TeamZone = ({
         {/* Team name */}
         <div className="grid place-items-center gap-1 text-center">
           <p
-            className={`text-xs font-black uppercase tracking-[0.18em] sm:text-base ${theme.text}`}
+            className={`font-['Rajdhani',ui-sans-serif] text-[13px] font-bold uppercase leading-none tracking-[0.2em] sm:text-base ${theme.text}`}
           >
             {team.name}
           </p>
@@ -59,7 +66,7 @@ const TeamZone = ({
 
         {/* Tap button */}
         <button
-          onClick={onTap}
+          onClick={handleTapClick}
           type="button"
           className={`group relative grid aspect-square w-[min(42vw,174px)] touch-manipulation select-none place-items-center rounded-full bg-gradient-to-br ${theme.button} p-3 shadow-2xl ring-[6px] transition duration-200 hover:brightness-110 active:scale-95 sm:w-[180px] sm:ring-7`}
           aria-label={`${team.name} tap button`}
@@ -74,10 +81,9 @@ const TeamZone = ({
           </span>
         </button>
 
-       
         {/* Power badge */}
         <div
-          className={`rounded-full px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] shadow-lg ring-1 backdrop-blur-md sm:px-4 sm:py-2 sm:text-xs ${theme.badge}`}
+          className={`rounded-full px-3.5 py-1.5 font-['Rajdhani',ui-sans-serif] text-[11px] font-bold uppercase leading-none tracking-[0.16em] shadow-lg ring-1 backdrop-blur-md sm:px-4 sm:py-2 sm:text-xs ${theme.badge}`}
         >
           {power}% power
         </div>
